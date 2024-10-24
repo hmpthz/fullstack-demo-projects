@@ -1,11 +1,15 @@
-import type { ReactNode, Dispatch, SetStateAction } from 'react';
+import type {
+    ReactNode,
+    Dispatch,
+    SetStateAction
+} from 'react';
 
 declare global {
     interface ChildrenProps {
         children: ReactNode
     }
     interface ClassProps {
-        className: string
+        className?: string
     }
 
     type ReactSetState<T> = Dispatch<SetStateAction<T>>;
