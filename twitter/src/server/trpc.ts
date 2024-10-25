@@ -15,6 +15,7 @@ import { ZodError } from "zod";
 
 import { getServerAuthSession } from "./auth";
 import { db } from "./db";
+import type { NextApiResponse } from "next";
 
 /**
  * 1. CONTEXT
@@ -26,6 +27,7 @@ import { db } from "./db";
 
 interface CreateContextOptions {
   session: Session | null;
+  revalidateSSG: NextApiResponse['revalidate'] | null;
 }
 
 /**
@@ -38,11 +40,8 @@ interface CreateContextOptions {
  *
  * @see https://create.t3.gg/en/usage/trpc#-serverapitrpcts
  */
-const createInnerTRPCContext = (opts: CreateContextOptions) => {
-  return {
-    session: opts.session,
-    db,
-  };
+export const createInnerTRPCContext = (opts: CreateContextOptions) => {
+  return { ...opts, db };
 };
 
 /**
@@ -59,6 +58,7 @@ export const createTRPCContext = async (opts: CreateNextContextOptions) => {
 
   return createInnerTRPCContext({
     session,
+    revalidateSSG: res.revalidate
   });
 };
 

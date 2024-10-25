@@ -1,12 +1,18 @@
 import { useCallback, useEffect, useState } from "react";
-import { tweetMutation } from "./api-tweet";
+import { apiMutation } from "./helper-mutation";
 import { debounce } from "@utils/debounce";
 
 export interface HeartButtonProps {
-    id: string;
+    tweetId: string;
+    userId: string;
     liked: boolean;
     count: number;
 }
+export interface FollowButtonProps {
+    userId: string;
+    followed: boolean;
+}
+
 export function useHeartButton(props: HeartButtonProps, wait: number) {
     // internal state
     const [_liked, _setLiked] = useState(props.liked);
@@ -17,7 +23,12 @@ export function useHeartButton(props: HeartButtonProps, wait: number) {
         _setCount(props.count);
     }, [props.liked, props.count]);
 
-    const toggleLike = tweetMutation.useToggleLike();
+    const updateCache = apiMutation.useToggleLikeCacheUpdate();
+    const toggleLike = apiMutation.useToggleLike({
+        onSuccess: ({ liked }, { tweetId }) => {
+            updateCache(tweetId, props.userId, liked);
+        }
+    });
     // preserve the same callback
     const toggleLikeMutate = useCallback(
         // invoke API immediately, after a while invoke trailling
@@ -31,8 +42,24 @@ export function useHeartButton(props: HeartButtonProps, wait: number) {
         // optimistic update
         _setLiked(!_liked);
         _setCount(_liked ? _count - 1 : _count + 1);
-        toggleLikeMutate(props.id, !_liked);
+        toggleLikeMutate(props.tweetId, !_liked);
     };
 
     return { _liked, _count, handleClick };
+}
+
+export function useFollowButton(props: FollowButtonProps, wait: number) {
+    const updateCache = apiMutation.useToggleFollowCacheUpdate();
+    const toggleFollow = apiMutation.useToggleFollow({
+        onSuccess: ({ followed }, { userId }) => {
+            updateCache(userId, followed);
+        }
+    });
+    const toggleFollowMutate = toggleFollow.mutate;
+
+    const handleClick = () => {
+        toggleFollowMutate({ userId: props.userId, follow: !props.followed });
+    }
+
+    return { handleClick };
 }

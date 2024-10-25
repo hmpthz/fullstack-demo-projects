@@ -6,6 +6,7 @@ import { useSession } from "next-auth/react";
 import { VscHeart, VscHeartFilled } from 'react-icons/vsc';
 import { IconHoverEffect } from "./IconHoverEffect";
 import { useHeartButton, type HeartButtonProps } from "@/hooks/optimistic-updates";
+import { LoadingSpinner } from "./LoadingSpinner";
 
 type TweetItem = RouterOutputs['tweet']['getFeed']['tweets'][0];
 
@@ -37,7 +38,7 @@ const TweetCard = ({ id, content, user, createdAt, likedByMe, likeCount }: Tweet
         <p className="whitespace-pre-wrap">
           {content}
         </p>
-        <HeartButton id={id} liked={likedByMe} count={likeCount} />
+        <HeartButton tweetId={id} userId={user.id} liked={likedByMe} count={likeCount} />
       </div>
     </li>
   );
@@ -75,7 +76,7 @@ const HeartButton = (props: HeartButtonProps) => {
 
 export function InfiniteTweetList({ tweets, isError, isLoading, hasMore, fetchMore }: TweetListProps) {
   if (isError) return <ErrorDisplay />
-  if (isLoading) return <LoadingDisplay />
+  if (isLoading) return <LoadingSpinner />
   if (!tweets || tweets.length == 0) return <NoTweet />;
 
   return (
@@ -84,16 +85,12 @@ export function InfiniteTweetList({ tweets, isError, isLoading, hasMore, fetchMo
         dataLength={tweets.length}
         next={fetchMore}
         hasMore={hasMore == true}
-        loader={<LoadingDisplay />}>
+        loader={<LoadingSpinner />}>
         {tweets.map(item => <TweetCard key={item.id} {...item} />)}
       </InfiniteScroll>
     </ul>
   );
 }
-
-const LoadingDisplay = () => (
-  <h1>Loading...</h1>
-)
 
 const ErrorDisplay = () => (
   <h1>Error...</h1>

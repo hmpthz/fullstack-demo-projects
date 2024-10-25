@@ -3,7 +3,7 @@ import { Button } from "./Button";
 import { ProfileImage } from "./ProfileImage";
 import { useCallback, useLayoutEffect, useRef, useState, type FormEvent } from "react";
 import type { Session } from "next-auth";
-import { tweetMutation } from "@/hooks/api-tweet";
+import { apiMutation } from "@/hooks/helper-mutation";
 
 function updateTextAreaSize(ele?: HTMLTextAreaElement) {
   if (!ele) return;
@@ -35,9 +35,11 @@ function ClientForm({ session }: ClientFormProps) {
     updateTextAreaSize(inputRef.current)
   }, [content]);
 
-  const createTweet = tweetMutation.useCreate({
+  const updateCache = apiMutation.useCreateTweetCacheUpdate();
+  const createTweet = apiMutation.useCreateTweet({
     onSuccess: (tweet => {
       setContent('');
+      updateCache(tweet, session);
     })
   });
 
