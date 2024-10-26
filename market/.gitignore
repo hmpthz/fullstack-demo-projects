@@ -11,10 +11,10 @@ node_modules
 dist
 dist-ssr
 *.local
-build
-.next
 
 # Editor directories and files
+.vscode/*
+!.vscode/extensions.json
 .idea
 .DS_Store
 *.suo
@@ -22,8 +22,4 @@ build
 *.njsproj
 *.sln
 *.sw?
-
-# Misc
-/playground/
-.vercel
-next-env.d.ts
+.env

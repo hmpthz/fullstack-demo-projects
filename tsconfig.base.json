@@ -7,7 +7,7 @@
     "target": "ESNext",
     "module": "ESNext",
     // https://blog.csdn.net/weixin_40013817/article/details/127200965
-    "moduleResolution": "Node16",
+    "moduleResolution": "Bundler",
     "resolveJsonModule": true,
     "allowJs": true,
     "strict": true,
