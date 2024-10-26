@@ -46,7 +46,7 @@ const TweetCard = ({ id, content, user, createdAt, likedByMe, likeCount }: Tweet
 
 const HeartButton = (props: HeartButtonProps) => {
   const session = useSession();
-  const { _liked, _count, handleClick } = useHeartButton(props, 500);
+  const { _liked, _count, handleClick } = useHeartButton(props, 1000);
 
   if (session.status != 'authenticated') {
     return (

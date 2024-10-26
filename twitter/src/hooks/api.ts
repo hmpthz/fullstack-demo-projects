@@ -41,7 +41,16 @@ export const api = createTRPCNext<AppRouter>({
         httpBatchLink({
           url: `${getBaseUrl()}/api/trpc`,
         }),
-      ]
+      ],
+      queryClientConfig: {
+        defaultOptions: {
+          queries: {
+            refetchOnWindowFocus: false,
+            refetchOnMount: true,
+            refetchOnReconnect: true
+          }
+        }
+      }
     };
   },
   /**

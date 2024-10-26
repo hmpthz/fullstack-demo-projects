@@ -13,6 +13,11 @@ const config = {
         protocol: 'https',
         hostname: 'cdn.discordapp.com',
         pathname: '**'
+      },
+      {
+        protocol: 'https',
+        hostname: 'platform-lookaside.fbsbx.com',
+        pathname: '**'
       }
     ]
   },

@@ -12,6 +12,7 @@ const createPrismaClient = async () => {
   };
   if (env.LOCAL_DB !== undefined) {
     const p = path.resolve(process.cwd(), 'prisma/pglite');
+    console.log(`[DEV] Load PGLite data at ${p}`);
     const pglite = await PGlite.create(`file://${p}`);
     opts.adapter = new PrismaPGlite(pglite);
   }

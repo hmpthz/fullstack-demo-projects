@@ -25,15 +25,15 @@ export function useHeartButton(props: HeartButtonProps, wait: number) {
 
     const updateCache = apiMutation.useToggleLikeCacheUpdate();
     const toggleLike = apiMutation.useToggleLike({
-        onSuccess: ({ liked }, { tweetId }) => {
-            updateCache(tweetId, props.userId, liked);
+        onSuccess: ({ like }, { tweetId }) => {
+            updateCache(tweetId, props.userId, like);
         }
     });
     // preserve the same callback
     const toggleLikeMutate = useCallback(
         // invoke API immediately, after a while invoke trailling
         debounce(
-            (id: string, liked: boolean) => toggleLike.mutate({ tweetId: id, liked })
+            (like: boolean) => toggleLike.mutate({ tweetId: props.tweetId, like })
             , wait, { leading: true }),
         []);
 
@@ -42,24 +42,40 @@ export function useHeartButton(props: HeartButtonProps, wait: number) {
         // optimistic update
         _setLiked(!_liked);
         _setCount(_liked ? _count - 1 : _count + 1);
-        toggleLikeMutate(props.tweetId, !_liked);
+        toggleLikeMutate(!_liked);
     };
 
     return { _liked, _count, handleClick };
 }
 
 export function useFollowButton(props: FollowButtonProps, wait: number) {
+    // internal state
+    const [_followed, _setFollowed] = useState(props.followed);
+    // force internal state sync with prop
+    useEffect(() => {
+        _setFollowed(props.followed)
+    }, [props.followed]);
+
     const updateCache = apiMutation.useToggleFollowCacheUpdate();
     const toggleFollow = apiMutation.useToggleFollow({
         onSuccess: ({ followed }, { userId }) => {
             updateCache(userId, followed);
         }
     });
-    const toggleFollowMutate = toggleFollow.mutate;
+    // preserve the same callback
+    const toggleFollowMutate = useCallback(
+        // invoke API immediately, after a while invoke trailling
+        debounce(
+            (follow: boolean) => toggleFollow.mutate({ userId: props.userId, follow })
+            , wait, { leading: true }),
+        []);
 
     const handleClick = () => {
-        toggleFollowMutate({ userId: props.userId, follow: !props.followed });
+        // set client side dispaly everytime no matter API has invoked or not
+        // optimistic update
+        _setFollowed(!_followed);
+        toggleFollowMutate(!props.followed);
     }
 
-    return { handleClick };
+    return { _followed, handleClick };
 }

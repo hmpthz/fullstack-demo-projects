@@ -57,9 +57,9 @@ const toggleFollowProcedure = protectedProcedure
       }
     });
 
-    const revalidate = () => {
-      ctx.revalidateSSG?.(`/profiles${userId}`);
-      ctx.revalidateSSG?.(`/profiles${currentUserId}`);
+    const revalidate = async () => {
+      ctx.revalidateSSG?.(`/profiles/${userId}`);
+      ctx.revalidateSSG?.(`/profiles/${currentUserId}`);
     };
     if (existingFollow && !follow) {
       await ctx.db.user.update({

@@ -21,23 +21,7 @@ async function execSql(sqlFileRelativePath: string) {
 }
 
 async function seedDb() {
-    const users: (Omit<User, 'id'>)[] = [
-        {
-            name: 'User A1',
-            email: 'usera1@example.com',
-            emailVerified: new Date(),
-            image: ''
-        },
-        {
-            name: 'User A2',
-            email: 'usera2@example.com',
-            emailVerified: new Date(),
-            image: ''
-        }
-    ];
-    await prisma.user.createMany({
-        data: users
-    });
+
 }
 
-main();
+await main();

@@ -4,7 +4,7 @@ import { ProfileImage } from "@/components/ProfileImage";
 import { InfiniteTweetList } from "@/components/TweetList";
 import { api } from "@/hooks/api";
 import { apiQuery } from "@/hooks/helper-query";
-import type { FollowButtonProps } from "@/hooks/optimistic-updates";
+import { useFollowButton, type FollowButtonProps } from "@/hooks/optimistic-updates";
 import { ssgHelper } from "@/server/ssgHelper";
 import type { GetStaticPaths, GetStaticPropsContext, InferGetStaticPropsType, NextPage } from "next";
 import { useSession } from "next-auth/react";
@@ -60,10 +60,11 @@ function HeaderButton(props: FollowButtonProps) {
 }
 
 function FollowButton(props: FollowButtonProps) {
+  const { _followed, handleClick } = useFollowButton(props, 1000);
 
   return (
-    <Button small gray={props.followed}>
-      {props.followed ? 'Unfollow' : 'Follow'}
+    <Button small gray={_followed} onClick={handleClick}>
+      {_followed ? 'Unfollow' : 'Follow'}
     </Button>
   )
 }

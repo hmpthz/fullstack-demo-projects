@@ -85,20 +85,20 @@ const getProfileFeedProcedure = publicProcedure
   });
 
 const toggleLikeProcedure = protectedProcedure
-  .input(z.object({ tweetId: z.string(), liked: z.boolean() }))
-  .mutation(async ({ ctx: { session, db }, input: { tweetId, liked } }) => {
+  .input(z.object({ tweetId: z.string(), like: z.boolean() }))
+  .mutation(async ({ ctx: { session, db }, input: { tweetId, like } }) => {
     const data = { userId: session.user.id, tweetId }
     const existingLike = await db.like.findUnique({
       where: { userId_tweetId: data }
     });
 
-    if (existingLike && !liked) {
+    if (existingLike && !like) {
       await db.like.delete({ where: { userId_tweetId: data } });
     }
-    else if (!existingLike && liked) {
+    else if (!existingLike && like) {
       await db.like.create({ data });
     }
-    return { liked };
+    return { like };
   });
 
 const createProcedure = protectedProcedure
@@ -111,7 +111,7 @@ const createProcedure = protectedProcedure
         content
       }
     });
-    ctx.revalidateSSG?.(`/profiles${currentUserId}`);
+    ctx.revalidateSSG?.(`/profiles/${currentUserId}`);
     return data;
   });
 

@@ -8,6 +8,7 @@
     "build": "next build",
     "start": "next start -p 5173",
     "lint": "next lint",
+    "type": "tsc --noEmit",
     "prisma": "prisma generate",
     "postinstall": "prisma generate"
   },
