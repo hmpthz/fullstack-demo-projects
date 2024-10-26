@@ -11,8 +11,8 @@ node_modules
 dist
 dist-ssr
 *.local
-/*/build
-/build/*
+build
+.next
 
 # Editor directories and files
 .idea

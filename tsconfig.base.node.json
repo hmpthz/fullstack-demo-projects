@@ -2,7 +2,7 @@
   "compilerOptions": {
     // Rollup requires esnext as well
     "target": "ESNext",
-    "module": "ESNext",
+    "module": "Node16",
     "moduleResolution": "Node16",
     "resolveJsonModule": true,
     "allowJs": true,

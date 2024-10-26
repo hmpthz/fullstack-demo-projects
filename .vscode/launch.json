@@ -10,6 +10,17 @@
             ]
         },
         {
+            "name": "TSX Node: Current File",
+            "type": "node",
+            "request": "launch",
+            "program": "${file}",
+            "runtimeExecutable": "tsx",
+            "runtimeArgs": [],
+            "skipFiles": [
+                "<node_internals>/**"
+            ]
+        },
+        {
             "name": "Browser: Chrome",
             "type": "chrome",
             "request": "launch",
@@ -32,28 +43,6 @@
                 "${workspaceFolder}/**",
                 "!**/node_modules/**"
             ],
-        },
-        {
-            "name": "Vite: dev-server",
-            "type": "node",
-            "request": "launch",
-            "runtimeExecutable": "pnpm",
-            "runtimeArgs": [
-                "run",
-                "dev"
-            ]
-        },
-        {
-            "name": "Python: prod-preview",
-            "type": "debugpy",
-            "request": "launch",
-            "module": "http.server",
-            "args": [
-                "4173",
-                "-d",
-                "./dist/"
-            ],
-            "console": "integratedTerminal"
         }
     ]
 }
