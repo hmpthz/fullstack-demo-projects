@@ -1,0 +1,15 @@
+{
+  "extends": "../../tsconfig.base.node.json",
+  "include": ["src", "../../utils"],
+  "exclude": ["node_modules"],
+  "compilerOptions": {
+    "incremental": true,
+    "paths": {
+      "@/*": ["./*"],
+      "@shared/*": ["../../utils/*"]
+    },
+    // Must be the same as rollup output dir
+    "outDir": "dist",
+    "types": ["node", "express"]
+  }
+}

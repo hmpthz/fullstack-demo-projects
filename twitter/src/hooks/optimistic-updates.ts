@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { apiMutation } from "./helper-mutation";
-import { debounce } from "@utils/debounce";
+import { debounce } from "@shared/debounce";
 
 export interface HeartButtonProps {
     tweetId: string;

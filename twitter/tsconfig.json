@@ -6,7 +6,7 @@
     "incremental": true,
     "paths": {
       "@/*": ["./src/*"],
-      "@utils/*": ["../utils/*"]
+      "@shared/*": ["../utils/*"]
     },
     "outDir": "./build"
   }

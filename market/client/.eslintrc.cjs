@@ -1,11 +1,23 @@
 module.exports = {
-  extends: [
-    'next/core-web-vitals',
-    'next/typescript'
-  ],
+  root: true,
+  env: { browser: true },
   plugins: [
+    '@typescript-eslint',
     'unused-imports'
   ],
+  parserOptions: {
+    ecmaVersion: 'latest',
+    sourceType: 'module',
+    parser: '@typescript-eslint/parser'
+  },
+  extends: [
+    'eslint:recommended',
+    'plugin:react/recommended',
+    'plugin:react/jsx-runtime',
+    'plugin:@typescript-eslint/recommended'
+  ],
+  ignorePatterns: ['dist'],
+  settings: { react: { version: '18.3' } },
   rules: {
     'prefer-const': 'warn',
     '@typescript-eslint/no-empty-object-type': 'warn',
@@ -26,5 +38,5 @@ module.exports = {
         'argsIgnorePattern': '^_',
       },
     ]
-  }
-};
+  },
+}
