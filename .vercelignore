@@ -21,7 +21,7 @@ twitter/prisma/pglite
 
 # for market project
 # this is the bundled backend that will be uploaded to vercel, should not be tracked by git
-market/api
+# market/api
 
 # testing
 coverage

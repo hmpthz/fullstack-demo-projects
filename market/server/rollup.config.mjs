@@ -13,7 +13,7 @@ export default defineConfig({
     commonjs()
   ],
   output: {
-    dir: 'dist',
+    dir: '../api',
     format: 'es',
     compact: true,
     generatedCode: 'es2015',

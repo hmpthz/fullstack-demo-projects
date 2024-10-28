@@ -3,7 +3,8 @@
     "typescript.tsdk": "node_modules\\typescript\\lib",
     "typescript.preferences.importModuleSpecifier": "shortest",
     "files.associations": {
-        "*.css": "tailwindcss"
+        "*.css": "tailwindcss",
+        ".vercelignore": "ignore"
     },
     "tailwindCSS.classAttributes": [
         "class",

@@ -9,7 +9,7 @@
       "@shared/*": ["../../utils/*"]
     },
     // Must be the same as rollup output dir
-    "outDir": "dist",
+    "outDir": "../api",
     "types": ["node", "express"]
   }
 }

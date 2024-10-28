@@ -8,9 +8,6 @@ importers:
 
   .:
     devDependencies:
-      '@electric-sql/pglite':
-        specifier: ^0.2.12
-        version: 0.2.12
       '@rollup/plugin-commonjs':
         specifier: ^28.0.1
         version: 28.0.1(rollup@4.24.0)
@@ -50,9 +47,6 @@ importers:
       jest-environment-jsdom:
         specifier: ^29.7.0
         version: 29.7.0
-      mongodb-memory-server:
-        specifier: ^10.1.2
-        version: 10.1.2
       rollup:
         specifier: ^4.22.4
         version: 4.24.0
@@ -154,6 +148,9 @@ importers:
       '@types/express':
         specifier: ^4.17.21
         version: 4.17.21
+      mongodb-memory-server:
+        specifier: ^10.1.2
+        version: 10.1.2
 
   social/client:
     dependencies:
@@ -248,6 +245,10 @@ importers:
       multer:
         specifier: ^1.4.5-lts.1
         version: 1.4.5-lts.1
+    devDependencies:
+      mongodb-memory-server:
+        specifier: ^10.1.2
+        version: 10.1.2
 
   twitter:
     dependencies:
@@ -297,6 +298,9 @@ importers:
         specifier: ^3.23.8
         version: 3.23.8
     devDependencies:
+      '@electric-sql/pglite':
+        specifier: ^0.2.12
+        version: 0.2.12
       '@types/react':
         specifier: ^18.3.6
         version: 18.3.11
