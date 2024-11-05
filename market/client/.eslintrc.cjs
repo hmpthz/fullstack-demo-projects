@@ -21,6 +21,7 @@ module.exports = {
   rules: {
     'prefer-const': 'warn',
     '@typescript-eslint/no-empty-object-type': 'warn',
+    '@typescript-eslint/no-namespace': 0,
     'react/react-in-jsx-scope': 0,
     // https://stackoverflow.com/questions/38684925/react-eslint-error-missing-in-props-validation
     'react/prop-types': 0,

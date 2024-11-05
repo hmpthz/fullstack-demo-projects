@@ -9,8 +9,11 @@ export default defineConfig({
  * Whenver there are dynamically imported assets, or
  * static assets referenced by root relative url in the source code,
  * Vite would automatically replace `"/"` with this root path.
+ * @note
+ * If you're using React Router + Vercel rewrites, it must be absolute path.
+ * Otherwise nested routes will request assets in wrong path.
  */
-  base: '',
+  base: '/',
   /** it's just `index.html` directory for vite to find */
   root: '',
   /** relative to root */

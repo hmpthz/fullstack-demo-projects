@@ -1,11 +1,11 @@
 {
   "extends": "../../tsconfig.base.node.json",
-  "include": ["src", "../../utils"],
+  "include": ["src", "mock", "../../utils"],
   "exclude": ["node_modules"],
   "compilerOptions": {
     "incremental": true,
     "paths": {
-      "@/*": ["./*"],
+      "@/*": ["./src/*"],
       "@shared/*": ["../../utils/*"]
     },
     // Must be the same as rollup output dir

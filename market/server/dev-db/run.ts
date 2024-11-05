@@ -1,0 +1,33 @@
+import { MongoMemoryServer } from 'mongodb-memory-server';
+import path from 'path';
+import fs from 'fs';
+
+async function main() {
+  const memdb = await initMemDb();
+  console.log('\n_____________________\n');
+  console.log(`MongoDB Memory Server is running...`);
+  console.log(`Connection string: ${memdb.getUri()}\n`);
+}
+
+async function initMemDb() {
+  const binPath = path.resolve(import.meta.dirname, '..', '..', '..', '.temp');
+  const dbPath = path.resolve(import.meta.dirname, '.temp');
+  console.log('[BIN PATH]', binPath);
+  console.log('[DB PATH]', dbPath);
+
+  if (!fs.existsSync(dbPath)) {
+    fs.mkdirSync(dbPath);
+  }
+
+  return await MongoMemoryServer.create({
+    instance: {
+      dbPath,
+      port: 5172
+    },
+    binary: {
+      downloadDir: binPath
+    }
+  });
+}
+
+main();

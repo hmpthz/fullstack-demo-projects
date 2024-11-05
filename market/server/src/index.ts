@@ -1,14 +1,31 @@
 import express from 'express';
+import { connectDatabase, disconnectDatabase } from './utils/db.js';
+import { apiRouter } from './api/index.js';
+import { env } from './env.js';
+import { errorHandler } from './middlewares/error.middleware.js';
 
-const app = express();
+async function main() {
+    env.validate();
 
-app.get('/api/hello', (req, res) => {
-  res.json({ message: 'Hello World!' });
-});
+    const app = express();
+    app.locals.db = await connectDatabase();
+    app.use((_req, res, next) => {
+        if (env.VERCEL_ENV != undefined) {
+            // if deployed on vercel as functions, disconnect when each request ends
+            res.on('finish', disconnectDatabase);
+        }
+        next();
+    });
 
-const PORT = 8079;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+    app.use(express.json());
+    app.use('/api', apiRouter);
 
-export default app;
+    app.get('/api/hello', (req, res, next) => {
+
+    });
+
+    app.use(errorHandler);
+    return app;
+}
+
+export default main();

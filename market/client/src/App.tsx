@@ -1,18 +1,29 @@
-import { useState, useEffect } from 'react';
+import { Outlet, type RouteObject } from 'react-router-dom';
+import { homeRoute } from './pages/Home';
+import { signinRoute } from './pages/SignIn';
+import { signupRoute } from './pages/SignUp';
+import { aboutRoute } from './pages/About';
+import { profileRoute } from './pages/Profile';
+import { Header } from './components/Header';
 
-export default function App() {
-  const [message, setMessage] = useState('Loading...');
+export const appRoute: RouteObject[] = [
+  {
+    element: <App />,
+    children: [
+      homeRoute,
+      signinRoute,
+      signupRoute,
+      aboutRoute,
+      profileRoute
+    ]
+  }
+];
 
-  useEffect(() => {
-    fetch('/api/hello')
-      .then(response => response.json())
-      .then(data => setMessage(data.message))
-      .catch(e => setMessage('error: ' + JSON.stringify(e)));
-  }, []);
-
+function App() {
   return (
-    <div>
-      <h1 className='text-center text-2xl'>{message}</h1>
-    </div>
+    <>
+      <Header />
+      <Outlet />
+    </>
   );
 }

@@ -28,6 +28,7 @@ coverage
 
 # misc
 /playground
+.temp
 *.pem
 next-env.d.ts
 

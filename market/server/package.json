@@ -4,8 +4,10 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "tsx watch --include \"./src/**/*\" ./src/index.ts",
-    "build": "rollup -c"
+    "dev": "tsx watch --include \"./src/**/*\" ./src/run.ts",
+    "dev-db": "tsx ./dev-db/run.ts",
+    "build": "rollup -c",
+    "lint": "eslint ."
   },
   "keywords": [],
   "author": "",
@@ -16,9 +18,11 @@
     "dotenv": "^16.4.5",
     "express": "^4.21.0",
     "jsonwebtoken": "^9.0.2",
-    "mongoose": "^8.7.0"
+    "mongoose": "^8.7.0",
+    "oauth4webapi": "^3.1.2"
   },
   "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
     "@types/express": "^4.17.21",
     "mongodb-memory-server": "^10.1.2"
   }
