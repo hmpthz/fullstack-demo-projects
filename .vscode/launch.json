@@ -14,8 +14,9 @@
             "type": "node",
             "request": "launch",
             "program": "${file}",
-            "runtimeExecutable": "tsx",
-            "runtimeArgs": [],
+            "runtimeExecutable": "pnpm",
+            "runtimeArgs": ["exec", "tsx"],
+            "cwd": "${workspaceFolder}/market/server",
             "skipFiles": [
                 "<node_internals>/**"
             ]

@@ -1,3 +1,3 @@
-import express from 'express';
+import { AsyncHandlingRouter } from '@/middlewares/async-router.js';
 
-export const userRouter = express.Router();
+export const userRouter = AsyncHandlingRouter();

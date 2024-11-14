@@ -1,10 +1,27 @@
-import type { HandledError } from '@/utils/createError.js';
+import { mongo } from "mongoose";
+import { HandledError } from '@/utils/createError.js';
 import { type ErrorRequestHandler } from 'express';
 
-export const errorHandler: ErrorRequestHandler = (err, _req, res, _next) => {
-    let { name, message, statusCode } = err as HandledError;
-    statusCode ??= 500;
-    const errorMessage = `${name}: ${message}`
-    console.error(errorMessage);
-    res.status(statusCode).json({ error: errorMessage });
-}
+export const errorHandler: ErrorRequestHandler =
+    (err, _req, res, _next) => {
+        let message: string;
+        let statusCode = 500;
+
+        if (err instanceof HandledError) {
+            message = err.errmsg;
+            statusCode = err.statusCode;
+        }
+        else if (err instanceof mongo.MongoError) {
+            message = `${err.name}: ${err.message}`;
+            statusCode = 500;
+        }
+        else if (err instanceof Error) {
+            message = `${err.name}: ${err.message}`;
+        }
+        else {
+            message = `Unknown error`;
+        }
+
+        console.error(message);
+        res.status(statusCode).json({ error: message });
+    }

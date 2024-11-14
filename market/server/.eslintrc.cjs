@@ -14,7 +14,7 @@ module.exports = {
     'eslint:recommended',
     'plugin:@typescript-eslint/recommended'
   ],
-  ignorePatterns: ['dist'],
+  ignorePatterns: ['dist', 'dev-db'],
   settings: {},
   rules: {
     'prefer-const': 'warn',

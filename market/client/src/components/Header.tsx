@@ -4,7 +4,7 @@ import { SidebarMenu } from './SidebarMenu';
 import { Link } from 'react-router-dom';
 
 export function Header() {
-  const [menuOpen, setMenuOpen] = useState(true);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   return (
     <header className='bg-slate-200 shadow-md'>

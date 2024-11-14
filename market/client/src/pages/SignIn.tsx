@@ -1,7 +1,8 @@
-import { getErrorMessage } from '@/utils/error';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { useParams, type RouteObject } from 'react-router-dom';
+import { useAuth, type OICD_Auth_Context } from '@/hooks/useAuth';
+import { getErrorMessage } from '@/utils/error';
 
 export const signinRoute: RouteObject = {
   path: '/sign-in/:provider?',
@@ -11,8 +12,8 @@ export const signinRoute: RouteObject = {
 const supportedProviders = ['google'];
 
 function SignIn() {
-  const { provider, isLoading, hasError, getOAuthContext } = useSignIn();
-  const buttonDisabled = isLoading || (hasError != undefined);
+  const { provider, loading, hasError, getOAuthContext } = useSignIn();
+  const buttonDisabled = (loading != false);
 
   return (
     <>
@@ -28,38 +29,13 @@ function SignIn() {
   );
 }
 
-interface OICD_Auth_Context {
-  code_verifier: string;
-  nonce?: string;
-}
-interface OICD_Auth_Response {
-  ctx: OICD_Auth_Context,
-  auth_url: string
-}
 interface OICD_Token_Request extends OICD_Auth_Context {
   params: Record<string, string>;
 }
 
 function useSignIn() {
   const { provider } = useParams();
-  const [isLoading, setLoading] = useState(provider != undefined);
-  const [hasError, setError] = useState<string>();
-
-  const getOAuthContext = (provider: string) => () => {
-    setLoading(true);
-    axios.get<OICD_Auth_Response>(`/api/auth/${provider}`)
-      .then(res => {
-        const { ctx, auth_url } = res.data;
-        // keep context in session storage
-        sessionStorage.setItem(`oauth_${provider}`, JSON.stringify(ctx));
-        // redirect to auth url
-        // replace instead of href to prevent go back
-        window.location.replace(auth_url);
-      })
-      .catch(err => {
-        setError(getErrorMessage(err));
-      });
-  }
+  const { loading, setLoading, hasError, setError, getOAuthContext } = useAuth(provider != undefined);
 
   useEffect(() => {
     // main sign in page
@@ -87,6 +63,7 @@ function useSignIn() {
     // send to server
     axios.post(`/api/auth/${provider}/callback`, toSend)
       .then(res => {
+        setError(undefined);
         console.log(res.data);
       })
       .catch(err => {
@@ -96,7 +73,8 @@ function useSignIn() {
 
   return {
     provider,
-    isLoading,
+    loading,
+    setLoading,
     hasError,
     getOAuthContext
   };

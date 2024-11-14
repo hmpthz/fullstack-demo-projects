@@ -14,7 +14,7 @@ export async function connectDatabase() {
     }
     const db_url = process.env.LOCAL_DB == undefined
         ? process.env.DB_URL
-        : 'mongodb://127.0.0.1:5172/';
+        : 'mongodb://127.0.0.1:5172/estate-market';
 
     await mongoose.connect(db_url);
     console.log('Database connected.');

@@ -1,7 +1,7 @@
 import * as oauth from 'oauth4webapi';
 import { env } from '@/env.js';
 import GoogleDiscoveryDocument from '@/json/discovery.google.json';
-import { get_OICD_Token, get_OICD_Auth, type OICD_Auth_Handler, type ProviderOptions, type OICD_Token_Handler } from '@/middlewares/oicd.middleware.js';
+import { oicd_tokenHandler, oicd_authHandler, type OICD_AuthHandler, type ProviderOptions, type OICD_TokenHandler } from './oicd.middleware.js';
 
 const provider = () => ({
     issuer_url: 'https://accounts.google.com',
@@ -20,18 +20,18 @@ interface GoogleIDToken extends oauth.IDToken {
     picture?: string;
 }
 
-export const googleAuth: OICD_Auth_Handler[] = [
-    get_OICD_Auth(provider),
+export const googleAuth: OICD_AuthHandler[] = [
+    oicd_authHandler(provider),
     async (_req, res) => {
         res.json(res.locals.oicd);
     }
 ];
 
-export const googleCallback: OICD_Token_Handler[] = [
-    get_OICD_Token(provider),
+export const googleCallback: OICD_TokenHandler[] = [
+    oicd_tokenHandler(provider),
     async (_req, res) => {
         const claims = res.locals.oicd.claims as GoogleIDToken;
         const db = res.locals.db;
         res.json(claims);
     }
-]
+];

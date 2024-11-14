@@ -27,15 +27,14 @@ interface OICD_Auth_Locals {
         auth_url: string
     };
 }
-export type OICD_Auth_Handler = RequestHandler<object, object, object, object, OICD_Auth_Locals>;
+export type OICD_AuthHandler = RequestHandler<object, object, object, object, OICD_Auth_Locals>;
 
-export function get_OICD_Auth(optionsGetter: () => ProviderOptions) {
-    const middleware: OICD_Auth_Handler = async (_req, res, next) => {
+export function oicd_authHandler(optionsGetter: () => ProviderOptions) {
+    const middleware: OICD_AuthHandler = async (_req, res, next) => {
         const opts = optionsGetter();
         const discovery = await getDiscoveryDocument(opts);
         if (!discovery.authorization_endpoint) {
-            next(createError('Discovery', 'authorization_endpoint not found!', 404));
-            return;
+            return next(createError('Discovery', 'authorization_endpoint not found', 404));
         }
         const auth_endpoint = discovery.authorization_endpoint;
         const code_challenge_method_supported =
@@ -78,7 +77,7 @@ export function get_OICD_Auth(optionsGetter: () => ProviderOptions) {
             ctx,
             auth_url: auth_url.href
         };
-        next();
+        return next();
     };
     return middleware;
 }
@@ -92,42 +91,35 @@ interface OICD_Token_Locals {
         access_token: string
     };
 }
-export type OICD_Token_Handler = RequestHandler<object, object, OICD_Token_Request, object, OICD_Token_Locals>;
+export type OICD_TokenHandler = RequestHandler<object, object, OICD_Token_Request, object, OICD_Token_Locals>;
 
-export function get_OICD_Token(optionsGetter: () => ProviderOptions) {
-    const middleware: OICD_Token_Handler = async (req, res, next) => {
+export function oicd_tokenHandler(optionsGetter: () => ProviderOptions) {
+    const middleware: OICD_TokenHandler = async (req, res, next) => {
         const opts = optionsGetter();
         const discovery = await getDiscoveryDocument(opts);
         const client: oauth.Client = { client_id: opts.client_id };
         const clientAuth = oauth.ClientSecretPost(opts.client_secret);
 
-        try {
-            const params = oauth.validateAuthResponse(
-                discovery, client, new URLSearchParams(req.body.params)
-            );
-            const response = await oauth.authorizationCodeGrantRequest(
-                discovery, client, clientAuth, params, opts.redirect_uri, req.body.code_verifier
-            );
-            const tokenResult = await oauth.processAuthorizationCodeResponse(
-                discovery, client, response,
-                { expectedNonce: req.body.nonce, requireIdToken: true }
-            );
+        const params = oauth.validateAuthResponse(
+            discovery, client, new URLSearchParams(req.body.params)
+        );
+        const response = await oauth.authorizationCodeGrantRequest(
+            discovery, client, clientAuth, params, opts.redirect_uri, req.body.code_verifier
+        );
+        const tokenResult = await oauth.processAuthorizationCodeResponse(
+            discovery, client, response,
+            { expectedNonce: req.body.nonce, requireIdToken: true }
+        );
 
-            const claims = oauth.getValidatedIdTokenClaims(tokenResult);
-            if (!claims) {
-                next(createError('ID_Token', 'authorization_endpoint not found!', 500));
-                return;
-            }
-            res.locals.oicd = {
-                claims,
-                access_token: tokenResult.access_token
-            };
-            next();
+        const claims = oauth.getValidatedIdTokenClaims(tokenResult);
+        if (!claims) {
+            return next(createError('ID_Token', 'Failed to find valid token claims', 404));
         }
-        catch (err) {
-            next(err);
-            return;
-        }
+        res.locals.oicd = {
+            claims,
+            access_token: tokenResult.access_token
+        };
+        return next();
     }
     return middleware;
 }

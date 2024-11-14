@@ -1,6 +1,6 @@
 {
   "extends": "../../tsconfig.base.node.json",
-  "include": ["src", "mock", "../../utils"],
+  "include": ["src", "dev-db", "../../utils"],
   "exclude": ["node_modules"],
   "compilerOptions": {
     "incremental": true,

@@ -14,14 +14,15 @@ async function main() {
             // if deployed on vercel as functions, disconnect when each request ends
             res.on('finish', disconnectDatabase);
         }
-        next();
+        return next();
     });
 
     app.use(express.json());
     app.use('/api', apiRouter);
 
-    app.get('/api/hello', (req, res, next) => {
-
+    app.get('/api/hello', (_req, res, next) => {
+        const conn = res.locals.db.connection;
+        res.json({ host: conn.host, port: conn.port, dbName: conn.db?.databaseName, name: conn.name });
     });
 
     app.use(errorHandler);

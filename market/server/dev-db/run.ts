@@ -3,13 +3,13 @@ import path from 'path';
 import fs from 'fs';
 
 async function main() {
-  const memdb = await initMemDb();
+  const memdb = await initDevDb();
   console.log('\n_____________________\n');
   console.log(`MongoDB Memory Server is running...`);
   console.log(`Connection string: ${memdb.getUri()}\n`);
 }
 
-async function initMemDb() {
+async function initDevDb() {
   const binPath = path.resolve(import.meta.dirname, '..', '..', '..', '.temp');
   const dbPath = path.resolve(import.meta.dirname, '.temp');
   console.log('[BIN PATH]', binPath);

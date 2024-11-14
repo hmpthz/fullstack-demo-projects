@@ -20,8 +20,10 @@ twitter/prisma/migrations
 twitter/prisma/pglite
 
 # for market project
-# this is the bundled backend that will be uploaded to vercel, should not be tracked by git
+# this is the prebuilt function that will be uploaded to vercel, should not be tracked by git
 market/api
+market/server/dev-db
+!market/server/dev-db/run.ts
 
 # testing
 coverage
