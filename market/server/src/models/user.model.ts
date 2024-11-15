@@ -36,6 +36,7 @@ export type User = {
     email: string,
     username: string,
     password: string,
+    avatar: string,
     session?: Session,
     credentials: Credential[]
 }
@@ -50,6 +51,10 @@ const userSchema = new mongoose.Schema<User>({
         unique: true
     },
     password: {
+        type: String,
+        required: true
+    },
+    avatar: {
         type: String,
         required: true
     },

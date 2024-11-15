@@ -85,7 +85,7 @@ export function oicd_authHandler(optionsGetter: () => ProviderOptions) {
 interface OICD_Token_Request extends OICD_Auth_Context {
     params: Record<string, string>;
 }
-interface OICD_Token_Locals {
+export interface OICD_Token_Locals {
     oicd: {
         claims: oauth.IDToken,
         access_token: string

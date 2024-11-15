@@ -13,7 +13,12 @@ export const signUp: RequestHandler<object, object, SignUpFormData> =
     async (req, res) => {
         const { email, username, password } = req.body;
         const hashedPassword = bcryptjs.hashSync(password, 10);
-        const newUser = new userModel({ email, username, password: hashedPassword });
+        const newUser = new userModel({
+            email,
+            username,
+            password: hashedPassword,
+            avatar: '/blank-profile.png'
+        });
         await newUser.save();
         res.status(201).end();
     };
@@ -33,6 +38,7 @@ export const signIn: SessionHandler<SignInFormData>[] = [
             return next(createError('SignInError', 'Wrong email or password', 401));
         }
         res.locals.user = foundUser;
+        return next();
     },
     sessionHandler,
     tokenRefreshHandler(true)

@@ -7,13 +7,13 @@ import { env } from '@/env.js';
 const ACCESSTOKEN_LIFESPAN = 5 * (1000 * 60);
 const SESSION_LIFESPAN = 20 * (1000 * 60);
 
-interface Session_Locals {
+export interface Session_Locals {
     user: UserDoc;
 }
-export type SessionHandler<ReqBody> = RequestHandler<object, object, ReqBody, object, Session_Locals>;
+export type SessionHandler<ReqBody = object> = RequestHandler<object, object, ReqBody, object, Session_Locals>;
 
 /** Create a new session with empty refresh token */
-export const sessionHandler: SessionHandler<unknown> =
+export const sessionHandler: SessionHandler =
     async (_req, res, next) => {
         const user = res.locals.user;
         const expiredAt = Date.now() + SESSION_LIFESPAN;
@@ -24,18 +24,21 @@ export const sessionHandler: SessionHandler<unknown> =
             user.session.refreshToken = '';
             user.session.expiredAt = expiredAt;
         }
-        next();
+        return next();
     }
 
+interface UserProfile {
+    username: string;
+    email: string;
+    avatar: string;
+}
 interface TokenRefresh_Response {
     accessToken: string;
     expiredAt: number;
-    profile: {
-        username: string
-    }
+    profile: UserProfile;
 }
 /** Return a new access token */
-export const tokenRefreshHandler: (newRefreshToken: boolean) => SessionHandler<unknown> =
+export const tokenRefreshHandler: (newRefreshToken: boolean) => SessionHandler =
     (newRt) => async (_req, res) => {
         const user = res.locals.user;
         // session must exist
@@ -59,9 +62,14 @@ export const tokenRefreshHandler: (newRefreshToken: boolean) => SessionHandler<u
             { subject: user.id, expiresIn: ACCESSTOKEN_LIFESPAN.toString() }
         );
         const expiredAt = Date.now() + ACCESSTOKEN_LIFESPAN;
-        res.status(statusCode).json({
+        const resBody: TokenRefresh_Response = {
             accessToken,
             expiredAt,
-            profile: { username: user.username }
-        } as TokenRefresh_Response);
+            profile: {
+                username: user.username,
+                email: user.email,
+                avatar: user.avatar
+            }
+        };
+        res.status(statusCode).json(resBody);
     }

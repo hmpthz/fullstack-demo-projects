@@ -5,6 +5,7 @@ import { signupRoute } from './pages/SignUp';
 import { aboutRoute } from './pages/About';
 import { profileRoute } from './pages/Profile';
 import { Header } from './components/Header';
+import { ReduxStoreProvider } from './store/store';
 
 export const appRoute: RouteObject[] = [
   {
@@ -21,9 +22,9 @@ export const appRoute: RouteObject[] = [
 
 function App() {
   return (
-    <>
+    <ReduxStoreProvider>
       <Header />
       <Outlet />
-    </>
+    </ReduxStoreProvider>
   );
 }
