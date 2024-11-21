@@ -1,11 +1,10 @@
-import axios from 'axios';
 import { type FormEvent } from 'react';
 import { Link, useNavigate, type RouteObject } from 'react-router-dom';
-import { LuLoader2 } from "react-icons/lu";
-import { FaGoogle } from "react-icons/fa";
 import { useOAuth } from '@/hooks/useOAuth';
 import { validator } from '@/utils/validator';
 import { useForm } from '@/hooks/useForm';
+import { DesignTwd, ErrorSection, OAuthSection, SubmitButton } from '@/components/UI';
+import { publicApi } from '@/utils/axios';
 
 export const signupRoute: RouteObject = {
   path: '/sign-up',
@@ -28,53 +27,26 @@ function SignUp() {
 function Form() {
   const { loading, hasError, register, handleSubmit, handleOAuth } = useSignUp();
   const buttonDisabled = (loading != false);
-  const inputTwd = 'block my-4 p-3 rounded-lg w-full';
 
   return (
     <>
       <form onSubmit={handleSubmit}>
-        <input id='username' type='text' placeholder='username'
-          className={`${inputTwd} border`} {...register('username')} />
-        <input id='email' type='email' placeholder='email'
-          className={`${inputTwd} border`} {...register('email')} />
-        <input id='password' type='password' placeholder='password'
-          className={`${inputTwd} border`} {...register('password')} />
-        <button type='submit' disabled={buttonDisabled} className={`${inputTwd} text-white bg-slate-700 hover:bg-slate-600 disabled:bg-slate-500`}>
-          {loading != 'submit' ? 'SIGN UP' : <LoadingContent />}
-        </button>
+        <input id='username' type='text' placeholder='username' autoComplete='username'
+          className={DesignTwd.input} {...register('username')} />
+        <input id='email' type='email' placeholder='email' autoComplete='email'
+          className={DesignTwd.input} {...register('email')} />
+        <input id='password' type='password' placeholder='password' autoComplete='new-password'
+          className={DesignTwd.input} {...register('password')} />
+        <SubmitButton loading={loading} disabled={buttonDisabled}>
+          SIGN UP
+        </SubmitButton>
       </form>
 
-      <div className='-my-1 flex items-center'>
-        <span className='bg-gray-300 h-0.5 w-full' />
-        <span className='mx-4'>or</span>
-        <span className='bg-gray-300 h-0.5 w-full' />
-      </div>
-      <button type='button' disabled={buttonDisabled} onClick={handleOAuth('google')}
-        className={`${inputTwd} text-white bg-red-700 hover:bg-red-700/80 disabled:bg-red-700/80`}>
-        {loading != 'google' ? <GoogleButtonContent /> : <LoadingContent />}
-      </button>
-
-      {hasError &&
-        <p className={`${inputTwd} border-2 border-red-600 bg-red-200/80 text-red-800`}>
-          {hasError}
-        </p>}
+      <OAuthSection loading={loading} disabled={buttonDisabled} handle={handleOAuth} />
+      <ErrorSection error={hasError} />
     </>
   );
 }
-
-const GoogleButtonContent = () => (
-  <p className='flex justify-center items-center gap-3'>
-    <FaGoogle className='w-5 h-5' />
-    <span>CONTINUE WITH GOOGLE</span>
-  </p>
-);
-
-const LoadingContent = () => (
-  <p className='flex justify-center items-center gap-2'>
-    <LuLoader2 className='w-5 h-5 animate-spin' />
-    <span>Loading...</span>
-  </p>
-);
 
 
 type SignUpFormData = {
@@ -101,7 +73,7 @@ function useSignUp() {
     }
 
     req.onSend('submit');
-    axios.post('/api/auth/signup', formData)
+    publicApi.post('/api/auth/signup', formData)
       .then(handleSignUpSuccess)
       .catch(req.onError);
   }

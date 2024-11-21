@@ -10,6 +10,7 @@ async function main() {
     const app = express();
     app.locals.db = await connectDatabase();
     app.use((_req, res, next) => {
+        res.locals.db = app.locals.db;
         if (env.VERCEL_ENV != undefined) {
             // if deployed on vercel as functions, disconnect when each request ends
             res.on('finish', disconnectDatabase);
@@ -20,7 +21,7 @@ async function main() {
     app.use(express.json());
     app.use('/api', apiRouter);
 
-    app.get('/api/hello', (_req, res, next) => {
+    app.get('/api/hello', (_req, res) => {
         const conn = res.locals.db.connection;
         res.json({ host: conn.host, port: conn.port, dbName: conn.db?.databaseName, name: conn.name });
     });

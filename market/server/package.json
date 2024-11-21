@@ -7,6 +7,7 @@
     "dev": "tsx watch --include \"./src/**/*\" ./src/run.ts",
     "dev-db": "tsx ./dev-db/run.ts",
     "build": "rollup -c",
+    "type": "tsc --noEmit",
     "lint": "eslint ."
   },
   "keywords": [],

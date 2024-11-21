@@ -1,17 +1,16 @@
 import { useState } from 'react';
-import { getErrorMessage } from '@/utils/error';
 
-export function useRequestStates(initialLoading: string | boolean) {
+export function useRequestStates(initialLoading: string | boolean, initialError?: string) {
   const [loading, setLoading] = useState<string | boolean>(initialLoading);
-  const [hasError, setError] = useState<string>();
+  const [hasError, setError] = useState(initialError);
 
   function onSuccess() {
     setLoading(false);
     setError(undefined);
   }
-  function onError(err: unknown) {
+  function onError(errMsg: string) {
     setLoading(false);
-    setError(getErrorMessage(err));
+    setError(errMsg);
   }
   function onSend(loading: string | true) {
     setLoading(loading);

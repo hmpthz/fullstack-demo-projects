@@ -1,22 +1,25 @@
 import { type RequestHandler } from 'express';
 import jwt from 'jsonwebtoken';
 import crypto from 'node:crypto';
-import type { UserDoc } from '@/models/user.model.js';
 import { env } from '@/env.js';
+import type { UserDoc } from '@/models/user.model.js';
+import type { OICD_Token_Locals } from './oicd.middleware.js';
 
-const ACCESSTOKEN_LIFESPAN = 5 * (1000 * 60);
-const SESSION_LIFESPAN = 20 * (1000 * 60);
+// seconds
+const ACCESSTOKEN_LIFESPAN = 5 * 60;
+const SESSION_LIFESPAN = 24 * 60 * 60;
 
 export interface Session_Locals {
     user: UserDoc;
 }
 export type SessionHandler<ReqBody = object> = RequestHandler<object, object, ReqBody, object, Session_Locals>;
+export type OICD_SessionHandler = RequestHandler<object, object, object, object, OICD_Token_Locals & Session_Locals>;
 
 /** Create a new session with empty refresh token */
 export const sessionHandler: SessionHandler =
     async (_req, res, next) => {
         const user = res.locals.user;
-        const expiredAt = Date.now() + SESSION_LIFESPAN;
+        const expiredAt = Date.now() + SESSION_LIFESPAN * 1000;
         if (!user.session) {
             user.session = { refreshToken: '', expiredAt };
         }
@@ -27,14 +30,18 @@ export const sessionHandler: SessionHandler =
         return next();
     }
 
+export interface UserToken {
+    s: string,
+    expiredAt: number
+}
 interface UserProfile {
+    id: string;
     username: string;
     email: string;
     avatar: string;
 }
 interface TokenRefresh_Response {
-    accessToken: string;
-    expiredAt: number;
+    accessToken: UserToken;
     profile: UserProfile;
 }
 /** Return a new access token */
@@ -49,23 +56,29 @@ export const tokenRefreshHandler: (newRefreshToken: boolean) => SessionHandler =
         if (newRt) {
             session.refreshToken = crypto.randomBytes(16).toString('hex');
             await user.save();
+            const maxAge = (session.expiredAt - Date.now());
             res.cookie(
                 'refresh_token', session.refreshToken,
-                { httpOnly: true, sameSite: 'strict', maxAge: (session.expiredAt - Date.now()) }
+                { httpOnly: true, sameSite: 'strict', maxAge }
             );
+            res.cookie(
+                'has_refresh_token', 1,
+                { httpOnly: false, sameSite: 'none', maxAge, secure: true }
+            );
+
             // server has created a new refresh token in database
             statusCode = 201;
         }
 
+        const issuedAt = Math.floor(Date.now() / 1000);
+        const expiredAt = issuedAt + ACCESSTOKEN_LIFESPAN;
         const accessToken = jwt.sign(
-            {}, env.JWT_SECRET,
-            { subject: user.id, expiresIn: ACCESSTOKEN_LIFESPAN.toString() }
+            { iat: issuedAt, exp: expiredAt, sub: user.id }, env.JWT_SECRET
         );
-        const expiredAt = Date.now() + ACCESSTOKEN_LIFESPAN;
         const resBody: TokenRefresh_Response = {
-            accessToken,
-            expiredAt,
+            accessToken: { s: accessToken, expiredAt },
             profile: {
+                id: user.id,
                 username: user.username,
                 email: user.email,
                 avatar: user.avatar

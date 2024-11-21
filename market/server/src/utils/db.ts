@@ -16,7 +16,7 @@ export async function connectDatabase() {
         ? process.env.DB_URL
         : 'mongodb://127.0.0.1:5172/estate-market';
 
-    await mongoose.connect(db_url);
+    await mongoose.connect(db_url, { connectTimeoutMS: 3000 });
     console.log('Database connected.');
     return mongoose;
 }

@@ -1,6 +1,5 @@
-import axios from 'axios';
-import { getErrorMessage } from '@/utils/error';
 import { useRequestStates } from './useRequestStates';
+import { publicApi } from '@/utils/axios';
 
 interface OICD_Auth_Context {
   code_verifier: string;
@@ -16,13 +15,13 @@ interface OICD_Token_Request extends OICD_Auth_Context {
 
 export const supportedProviders = ['google'];
 
-export function useOAuth(initialLoading: boolean) {
-  const req = useRequestStates(initialLoading);
+export function useOAuth(initialLoading: boolean, initialError?: string) {
+  const req = useRequestStates(initialLoading, initialError);
 
   const handleOAuthContext = (provider: string) => () => {
     req.setLoading(provider);
     req.setError(undefined);
-    axios.get<OICD_Auth_Response>(`/api/auth/${provider}`)
+    publicApi.get<OICD_Auth_Response>(`/api/auth/${provider}`)
       .then(res => {
         const { ctx, auth_url } = res.data;
         // keep context in session storage
@@ -31,8 +30,8 @@ export function useOAuth(initialLoading: boolean) {
         // replace instead of href to prevent go back
         window.location.replace(auth_url);
       })
-      .catch(err => {
-        req.setError(getErrorMessage(err));
+      .catch(errMsg => {
+        req.setError(errMsg);
       });
   }
 
@@ -64,10 +63,10 @@ export function useOAuth(initialLoading: boolean) {
       params
     };
     // send to server
-    axios.post(`/api/auth/${provider}/callback`, toSend)
+    publicApi.post(`/api/auth/${provider}/callback`, toSend)
       .then(res => handleSuccess(res.data))
-      .catch(err => {
-        req.setError(getErrorMessage(err));
+      .catch(errMsg => {
+        req.setError(errMsg);
       });
   }
 

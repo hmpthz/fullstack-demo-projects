@@ -3,6 +3,7 @@ const envSchema = {
     DB_URL: true,
     LOCAL_DB: false,
     JWT_SECRET: true,
+    SUPABASE_JWT_SECRET: true,
     GOOGLE_CLIENT_ID: true,
     GOOGLE_CLIENT_SECRET: true
 } as const;

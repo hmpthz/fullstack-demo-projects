@@ -2,6 +2,9 @@
 import type { ReactNode, Dispatch, SetStateAction } from 'react';
 
 declare global {
+    const SUPABASE_PROJECT_ID: string;
+    const DEBUG_IGNORE_TOKEN: boolean;
+
     interface ChildrenProps {
         children: ReactNode
     }

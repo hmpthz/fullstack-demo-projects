@@ -5,7 +5,9 @@ import { signupRoute } from './pages/SignUp';
 import { aboutRoute } from './pages/About';
 import { profileRoute } from './pages/Profile';
 import { Header } from './components/Header';
-import { ReduxStoreProvider } from './store/store';
+import { StoreProvider } from './store/store';
+import { useRefreshToken } from './utils/axios';
+import { privateRoute } from './components/PrivateRoute';
 
 export const appRoute: RouteObject[] = [
   {
@@ -15,16 +17,20 @@ export const appRoute: RouteObject[] = [
       signinRoute,
       signupRoute,
       aboutRoute,
-      profileRoute
+      privateRoute([
+        profileRoute
+      ])
     ]
   }
 ];
 
 function App() {
+  useRefreshToken();
+
   return (
-    <ReduxStoreProvider>
+    <StoreProvider>
       <Header />
       <Outlet />
-    </ReduxStoreProvider>
+    </StoreProvider>
   );
 }

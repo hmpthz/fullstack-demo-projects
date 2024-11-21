@@ -1,4 +1,4 @@
-import { createError } from '@/utils/createError.js';
+import { HandledError } from '@/utils/errors.js';
 import { type RequestHandler } from 'express';
 import * as oauth from 'oauth4webapi';
 
@@ -34,7 +34,7 @@ export function oicd_authHandler(optionsGetter: () => ProviderOptions) {
         const opts = optionsGetter();
         const discovery = await getDiscoveryDocument(opts);
         if (!discovery.authorization_endpoint) {
-            return next(createError('Discovery', 'authorization_endpoint not found', 404));
+            return next(HandledError.list['discovery|auth_endpoint|404']);
         }
         const auth_endpoint = discovery.authorization_endpoint;
         const code_challenge_method_supported =
@@ -113,7 +113,7 @@ export function oicd_tokenHandler(optionsGetter: () => ProviderOptions) {
 
         const claims = oauth.getValidatedIdTokenClaims(tokenResult);
         if (!claims) {
-            return next(createError('ID_Token', 'Failed to find valid token claims', 404));
+            return next(HandledError.list['id_token|failed_claims|404']);
         }
         res.locals.oicd = {
             claims,

@@ -1,7 +1,7 @@
 import { userModel } from '@/models/user.model.js';
 import { type RequestHandler } from 'express';
 import bcryptjs from 'bcryptjs';
-import { createError } from '@/utils/createError.js';
+import { HandledError } from '@/utils/errors.js';
 import { sessionHandler, tokenRefreshHandler, type SessionHandler } from './auth.middleware.js';
 
 type SignUpFormData = {
@@ -32,10 +32,10 @@ export const signIn: SessionHandler<SignInFormData>[] = [
         const { email, password } = req.body;
         const foundUser = await userModel.findOne({ email });
         if (!foundUser) {
-            return next(createError('SignInError', 'Email not found', 404));
+            return next(HandledError.list['signin|no_email|404']);
         }
         if (!bcryptjs.compareSync(password, foundUser.password)) {
-            return next(createError('SignInError', 'Wrong email or password', 401));
+            return next(HandledError.list['signin|wrong_credential|401']);
         }
         res.locals.user = foundUser;
         return next();

@@ -1,5 +1,5 @@
 import { mongo } from "mongoose";
-import { HandledError } from '@/utils/createError.js';
+import { HandledError } from '@/utils/errors.js';
 import { type ErrorRequestHandler } from 'express';
 
 export const errorHandler: ErrorRequestHandler =

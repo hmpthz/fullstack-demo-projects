@@ -1,29 +1,22 @@
-import { combineReducers, configureStore } from "@reduxjs/toolkit";
-import { persistReducer, persistStore } from 'redux-persist';
-import storage from "redux-persist/lib/storage";
-import { Provider, useSelector } from 'react-redux';
-import { userSlice } from "./slice/userSlice";
+import { configureStore } from "@reduxjs/toolkit";
+import { persistStore } from 'redux-persist';
+import { Provider, useDispatch, useSelector } from 'react-redux';
+import { userActions, userReducers } from "./slice/userSlice";
 import { PersistGate } from "redux-persist/integration/react";
 
-const rootReducer = combineReducers({
-  user: userSlice.reducer
-});
-const persistedRootReducer = persistReducer({
-  key: 'root',
-  storage,
-  version: 1
-}, rootReducer);
-
 const store = configureStore({
-  reducer: persistedRootReducer,
+  reducer: {
+    user: userReducers
+  },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: false
     })
 });
+type RootState = ReturnType<typeof store.getState>;
 const persistor = persistStore(store);
 
-export const ReduxStoreProvider = ({ children }: ChildrenProps) => (
+export const StoreProvider = ({ children }: ChildrenProps) => (
   <Provider store={store}>
     <PersistGate persistor={persistor}>
       {children}
@@ -32,4 +25,19 @@ export const ReduxStoreProvider = ({ children }: ChildrenProps) => (
 );
 
 const useRootSelector = useSelector.withTypes<ReturnType<typeof store.getState>>();
-export const useUserStore = () => useRootSelector(state => state.user);
+export function useRootStore(prop: keyof RootState) {
+  return useRootSelector(state => state[prop]);
+}
+export function useRootDispatch() {
+  const dispatch = useDispatch();
+  return {
+    dispatch,
+    userActions
+  };
+}
+
+export const getRootStore = () => ({
+  getState: store.getState,
+  dispatch: store.dispatch,
+  userActions
+});
