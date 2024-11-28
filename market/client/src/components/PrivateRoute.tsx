@@ -10,7 +10,7 @@ export const privateRoute: (children: RouteObject[]) => RouteObject = (children)
 function Private() {
   const { accessToken, profile, firstTime } = useRootStore('user');
 
-  if ((accessToken && profile) || DEBUG_IGNORE_TOKEN) {
+  if ((accessToken || DEBUG_IGNORE_TOKEN) && profile) {
     return <Outlet />;
   }
   else if (firstTime) {

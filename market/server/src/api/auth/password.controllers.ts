@@ -2,7 +2,7 @@ import { userModel } from '@/models/user.model.js';
 import { type RequestHandler } from 'express';
 import bcryptjs from 'bcryptjs';
 import { HandledError } from '@/utils/errors.js';
-import { sessionHandler, tokenRefreshHandler, type SessionHandler } from './auth.middleware.js';
+import { sessionHandler, tokenRefreshHandler, type SessionHandler } from '@/middlewares/auth.middleware.js';
 
 type SignUpFormData = {
     email: string,
@@ -17,7 +17,7 @@ export const signUp: RequestHandler<object, object, SignUpFormData> =
             email,
             username,
             password: hashedPassword,
-            avatar: '/blank-profile.png'
+            avatar: { publicURL: '/blank-profile.png' }
         });
         await newUser.save();
         res.status(201).end();

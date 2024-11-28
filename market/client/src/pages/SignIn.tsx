@@ -1,9 +1,9 @@
 import { useEffect, type FormEvent } from 'react';
 import { Link, useNavigate, useParams, useSearchParams, type RouteObject } from 'react-router-dom';
 import { useOAuth } from '@/hooks/useOAuth';
-import { validator } from '@/utils/validator';
+import { getValidator } from '@/utils/validator';
 import { useForm } from '@/hooks/useForm';
-import { DesignTwd, ErrorSection, OAuthSection, SubmitButton } from '@/components/UI';
+import { DesignTwd, AlertSection, OAuthSection, SubmitButton } from '@/components/UI';
 import { publicApi } from '@/utils/axios';
 import { useRootDispatch } from '@/store/store';
 
@@ -27,7 +27,7 @@ function SignIn() {
 
 function Form() {
   const { provider } = useParams();
-  const { loading, hasError, register, handleSubmit, handleOAuth } = useSignIn(provider);
+  const { loading, hasError, success, register, handleSubmit, handleOAuth } = useSignIn(provider);
   const buttonDisabled = (loading != false);
 
   return (
@@ -43,7 +43,7 @@ function Form() {
       </form>
 
       <OAuthSection loading={loading} disabled={buttonDisabled} handle={handleOAuth} />
-      <ErrorSection error={hasError} />
+      <AlertSection error={hasError} success={success} />
     </>
   );
 }
@@ -53,18 +53,22 @@ type SignInFormData = {
   email: string,
   password: string
 }
+const validate = getValidator({ email: true });
 
 function useSignIn(provider: string | undefined) {
   const [query] = useSearchParams();
-  const { req, handleOAuthContext, handleOAuthRedirect } = useOAuth(provider != undefined, query.get('error')!);
+  const { req, handleOAuthContext, handleOAuthRedirect } = useOAuth({
+    loading: provider != undefined, error: query.get('error') ?? undefined, success: query.get('success') ?? undefined
+  });
   const { formData, register } = useForm<SignInFormData>({ email: '', password: '' });
   const navigate = useNavigate();
   const { dispatch, userActions } = useRootDispatch();
 
   function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    if (!validator.email(formData)) {
-      req.setError(validator.errors.email); return;
+    const validated = validate(formData);
+    if (validated !== true) {
+      req.setError(validated); return;
     }
 
     req.onSend('submit');
@@ -88,6 +92,7 @@ function useSignIn(provider: string | undefined) {
   return {
     loading: req.loading,
     hasError: req.hasError,
+    success: req.success,
     register,
     handleSubmit,
     handleOAuth: handleOAuthContext

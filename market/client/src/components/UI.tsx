@@ -1,6 +1,7 @@
 import type React from "react";
 import { FaGoogle } from "react-icons/fa";
 import { LuLoader2 } from "react-icons/lu";
+import type { Alert } from "@/hooks/useRequestStates";
 
 export const DesignTwd = {
   shared: 'my-4 p-3 rounded-lg',
@@ -35,15 +36,16 @@ export const SubmitButton = ({ loading, disabled, children }: SubmitButtonProps 
   </LoadingButton>
 );
 
-interface ErrorProps {
-  error: string | undefined;
-}
-export const ErrorSection = ({ error }: ErrorProps) => (
+export const AlertSection = ({ error, success }: Alert) => (
   error
     ? <p className={`${DesignTwd.button} border-2 border-red-600 bg-red-200/80 text-red-800`}>
       {error}
     </p>
-    : null
+    : success
+      ? <p className={`${DesignTwd.button} border-2 border-green-600 bg-green-200/80 text-green-800`}>
+        {success}
+      </p>
+      : null
 );
 
 interface OAuthProps extends SubmitButtonProps {

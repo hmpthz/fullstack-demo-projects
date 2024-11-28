@@ -2,14 +2,47 @@ import { type RequestHandler } from 'express';
 import jwt from 'jsonwebtoken';
 import crypto from 'node:crypto';
 import { env } from '@/env.js';
-import type { UserDoc } from '@/models/user.model.js';
-import type { OICD_Token_Locals } from './oicd.middleware.js';
+import type { UserDoc, UserProfile } from '@/models/user.model.js';
+import type { OICD_Token_Locals } from '@/api/auth/oicd.middleware.js';
+import { HandledError } from '@/utils/errors.js';
+
+interface Private_Locals {
+    userId: string;
+}
+export type PrivateHandler<ReqBody = object, ReqParams = object> = RequestHandler<ReqParams, object, ReqBody, object, Private_Locals>;
+
+/** Authenticate access token */
+export const privateHandler: PrivateHandler = (req, res, next) => {
+    const authHeader = req.headers['authorization'];
+    if (!authHeader) {
+        return next(HandledError.list['auth|no_at|401']);
+    }
+    const [authType, authToken] = authHeader.split(' ');
+    if (authType != 'Bearer') {
+        return next(HandledError.list['auth|invalid_at|401']);
+    }
+    try {
+        const payload = jwt.verify(authToken, env.JWT_SECRET, { complete: false });
+        if (typeof payload == 'string' || !payload.sub) {
+            return next(HandledError.list['auth|invalid_at|401']);
+        }
+        res.locals.userId = payload.sub;
+        return next();
+    }
+    catch (err) {
+        if ((err as Error).name == 'TokenExpiredError')
+            return next(HandledError.list['auth|at_expired|403']);
+        else
+            return next(HandledError.list['auth|invalid_at|401']);
+    }
+}
+
 
 // seconds
 const ACCESSTOKEN_LIFESPAN = 5 * 60;
 const SESSION_LIFESPAN = 24 * 60 * 60;
 
-export interface Session_Locals {
+interface Session_Locals {
     user: UserDoc;
 }
 export type SessionHandler<ReqBody = object> = RequestHandler<object, object, ReqBody, object, Session_Locals>;
@@ -30,20 +63,16 @@ export const sessionHandler: SessionHandler =
         return next();
     }
 
+
 export interface UserToken {
     s: string,
     expiredAt: number
-}
-interface UserProfile {
-    id: string;
-    username: string;
-    email: string;
-    avatar: string;
 }
 interface TokenRefresh_Response {
     accessToken: UserToken;
     profile: UserProfile;
 }
+
 /** Return a new access token */
 export const tokenRefreshHandler: (newRefreshToken: boolean) => SessionHandler =
     (newRt) => async (_req, res) => {
@@ -79,8 +108,8 @@ export const tokenRefreshHandler: (newRefreshToken: boolean) => SessionHandler =
             accessToken: { s: accessToken, expiredAt },
             profile: {
                 id: user.id,
-                username: user.username,
                 email: user.email,
+                username: user.username,
                 avatar: user.avatar
             }
         };

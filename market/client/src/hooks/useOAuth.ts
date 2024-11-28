@@ -15,8 +15,8 @@ interface OICD_Token_Request extends OICD_Auth_Context {
 
 export const supportedProviders = ['google'];
 
-export function useOAuth(initialLoading: boolean, initialError?: string) {
-  const req = useRequestStates(initialLoading, initialError);
+export function useOAuth(initial: Parameters<typeof useRequestStates>[0]) {
+  const req = useRequestStates(initial);
 
   const handleOAuthContext = (provider: string) => () => {
     req.setLoading(provider);

@@ -72,8 +72,8 @@ importers:
   market/client:
     dependencies:
       '@hmpthz/supabase-storage-js':
-        specifier: ^0.0.0
-        version: 0.0.0
+        specifier: 0.0.1
+        version: 0.0.1
       '@reduxjs/toolkit':
         specifier: ^2.2.7
         version: 2.2.7(react-redux@9.1.2(@types/react@18.3.11)(react@18.3.1)(redux@5.0.1))(react@18.3.1)
@@ -129,6 +129,9 @@ importers:
 
   market/server:
     dependencies:
+      '@types/cookie-parser':
+        specifier: ^1.4.7
+        version: 1.4.7
       bcryptjs:
         specifier: ^2.4.3
         version: 2.4.3
@@ -862,8 +865,8 @@ packages:
     resolution: {integrity: sha512-d9zaMRSTIKDLhctzH12MtXvJKSSUhaHcjV+2Z+GK+EEY7XKpP5yR4x+N3TAcHTcu963nIr+TMcCb4DBCYX1z6Q==}
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
 
-  '@hmpthz/supabase-storage-js@0.0.0':
-    resolution: {integrity: sha512-reTL3ZVR+VFR+3r9cN+xn9jPi0zG3mhmREeYcfh7QGxceF94I4EBaoGN1mh9ZuWXveKdm/VAPkxTw36JeMXUKw==}
+  '@hmpthz/supabase-storage-js@0.0.1':
+    resolution: {integrity: sha512-CJCZhNDN+fST5OF77OTHh5SkxhU3eezxIZXRI708KVTCgwGh5FbZLiuI1tXf4RG3zA/OJGSSGGb1YCe3yfZuZA==}
 
   '@humanwhocodes/config-array@0.13.0':
     resolution: {integrity: sha512-DZLEEqFWQFiyK6h5YIeynKx7JlvCYWL0cImfSRXZ9l4Sg2efkFGTuFf6vzXjK1cq6IYkU+Eg/JizXw+TD2vRNw==}
@@ -1479,6 +1482,9 @@ packages:
 
   '@types/connect@3.4.38':
     resolution: {integrity: sha512-K6uROf1LD88uDQqJCktA4yzL1YYAK6NgfsI0v/mTgyPKWsX1CnJ0XPSDhViejru1GcRkLWb8RlzFYJRqGUbaug==}
+
+  '@types/cookie-parser@1.4.7':
+    resolution: {integrity: sha512-Fvuyi354Z+uayxzIGCwYTayFKocfV7TuDYZClCdIP9ckhvAu/ixDtCB6qx2TT0FKjPLf1f3P/J1rgf6lPs64mw==}
 
   '@types/estree@1.0.6':
     resolution: {integrity: sha512-AYnb1nQyY49te+VRAVgmzfcgjYS91mY5P0TKUDCLEM+gNnA+3T6rWITXRLYCpahpqSQbN5cE+gHpnPyXjHWxcw==}
@@ -5037,7 +5043,7 @@ snapshots:
 
   '@eslint/js@8.57.1': {}
 
-  '@hmpthz/supabase-storage-js@0.0.0':
+  '@hmpthz/supabase-storage-js@0.0.1':
     dependencies:
       '@supabase/node-fetch': 2.6.15
 
@@ -5676,6 +5682,10 @@ snapshots:
   '@types/connect@3.4.38':
     dependencies:
       '@types/node': 22.7.4
+
+  '@types/cookie-parser@1.4.7':
+    dependencies:
+      '@types/express': 4.17.21
 
   '@types/estree@1.0.6': {}
 

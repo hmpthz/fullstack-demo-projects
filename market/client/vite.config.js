@@ -59,7 +59,7 @@ const config = defineConfig({
 
 export default defineConfig(({ mode }) => {
   if (mode == 'development') {
-    config.define.DEBUG_IGNORE_TOKEN = true;
+    // config.define.DEBUG_IGNORE_TOKEN = true;
   }
   return config;
 })

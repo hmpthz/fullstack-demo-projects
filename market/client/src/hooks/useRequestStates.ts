@@ -1,12 +1,22 @@
 import { useState } from 'react';
 
-export function useRequestStates(initialLoading: string | boolean, initialError?: string) {
-  const [loading, setLoading] = useState<string | boolean>(initialLoading);
-  const [hasError, setError] = useState(initialError);
+export type Alert = {
+  error?: string,
+  success?: string
+}
+export function useRequestStates(initial: { loading: string | boolean } & Alert) {
+  const [loading, setLoading] = useState<string | boolean>(initial.loading);
+  const [alert, setAlert] = useState<Alert>({ error: initial.error, success: initial.success });
 
-  function onSuccess() {
+  function setError(errMsg?: string) {
+    setAlert({ error: errMsg, success: undefined });
+  }
+  function setSuccess(successMsg?: string) {
+    setAlert({ error: undefined, success: successMsg });
+  }
+  function onSuccess(successMsg?: string) {
     setLoading(false);
-    setError(undefined);
+    setSuccess(successMsg);
   }
   function onError(errMsg: string) {
     setLoading(false);
@@ -19,7 +29,8 @@ export function useRequestStates(initialLoading: string | boolean, initialError?
 
   return {
     loading, setLoading,
-    hasError, setError,
+    hasError: alert.error, setError,
+    success: alert.success, setSuccess,
     onSuccess, onError, onSend
   };
 }

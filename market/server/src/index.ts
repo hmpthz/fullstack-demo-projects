@@ -1,4 +1,5 @@
 import express from 'express';
+import cookieParser from 'cookie-parser';
 import { connectDatabase, disconnectDatabase } from './utils/db.js';
 import { apiRouter } from './api/index.js';
 import { env } from './env.js';
@@ -19,6 +20,7 @@ async function main() {
     });
 
     app.use(express.json());
+    app.use(cookieParser());
     app.use('/api', apiRouter);
 
     app.get('/api/hello', (_req, res) => {

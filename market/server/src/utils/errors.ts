@@ -7,7 +7,10 @@ export class HandledError {
         'session|no_refresh_token|401': new HandledError('SessionError', 'No refresh_token provided', 401),
         'session|invalid_refresh_token|401': new HandledError('SessionError', 'Invalid refresh_token', 401),
         'session|expired|403': new HandledError('SessionError', 'Session expired', 403),
-        'auth|at_expired|403': new HandledError('AuthError', 'access_token expired', 403)
+        'auth|no_at|401': new HandledError('AuthError', 'No access_token', 401),
+        'auth|invalid_at|401': new HandledError('AuthError', 'Invalid access_token', 401),
+        'auth|at_expired|403': new HandledError('AuthError', 'access_token expired', 403),
+        'update|wrong_userid|403': new HandledError('UpdateError', 'Wrong user Id', 403)
     };
 
     errmsg: string;

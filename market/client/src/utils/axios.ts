@@ -53,7 +53,7 @@ const tokenRefresher = new class TokenRefresher {
         }
         try {
             const res = await publicApi.get<TokenRefresh_Response>(
-                '/api/auth/refresh', { withCredentials: true }
+                '/api/auth/token/refresh', { withCredentials: true }
             );
             dispatch(userActions.setTokenRefresh(res.data));
             return res.data.accessToken.s;
@@ -107,7 +107,7 @@ if (!DEBUG_IGNORE_TOKEN) {
         (res) => res,
         async (err) => {
             if (!isReadableError(err)) {
-                throw (err as object).toString();
+                throw err;
             }
 
             const errMsg = err.response.data.error;
@@ -125,3 +125,11 @@ if (!DEBUG_IGNORE_TOKEN) {
         }
     );
 }
+
+// final middleware to process error to a string
+privateApi.interceptors.response.use(
+    (res) => res,
+    (err) => {
+        throw getErrorMessage(err);
+    }
+);

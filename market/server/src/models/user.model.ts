@@ -1,10 +1,10 @@
 import mongoose from "mongoose";
 
-export type Session = {
+export interface Session {
     /** Can be seen as a session id */
-    refreshToken: string,
+    refreshToken: string;
     /** Epoch in milliseconds */
-    expiredAt: number
+    expiredAt: number;
 }
 const sessionSchema = new mongoose.Schema<Session>({
     refreshToken: {
@@ -17,9 +17,9 @@ const sessionSchema = new mongoose.Schema<Session>({
     }
 });
 
-export type Credential = {
-    issuer: string,
-    sub: string
+export interface Credential {
+    issuer: string;
+    sub: string;
 }
 const credentialSchema = new mongoose.Schema<Credential>({
     issuer: {
@@ -32,11 +32,18 @@ const credentialSchema = new mongoose.Schema<Credential>({
     }
 });
 
-export type User = {
+export interface StorageObject {
+    storageURL?: string;
+    publicURL: string;
+}
+export interface UserProfile {
+    id: string;
     email: string,
     username: string,
+    avatar: StorageObject,
+}
+export interface User extends UserProfile {
     password: string,
-    avatar: string,
     session?: Session,
     credentials: Credential[]
 }
@@ -55,8 +62,13 @@ const userSchema = new mongoose.Schema<User>({
         required: true
     },
     avatar: {
-        type: String,
-        required: true
+        storageURL: {
+            type: String
+        },
+        publicURL: {
+            type: String,
+            required: true
+        }
     },
     session: sessionSchema,
     credentials: {

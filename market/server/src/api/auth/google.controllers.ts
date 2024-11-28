@@ -3,9 +3,8 @@ import crypto from 'node:crypto';
 import bcryptjs from 'bcryptjs';
 import { env } from '@/env.js';
 import GoogleDiscoveryDocument from '@/json/discovery.google.json';
-import { oicd_tokenHandler, oicd_authHandler, type OICD_AuthHandler, type ProviderOptions, type OICD_TokenHandler, type OICD_Token_Locals } from './oicd.middleware.js';
-import type { RequestHandler } from 'express';
-import { sessionHandler, tokenRefreshHandler, type OICD_SessionHandler, type SessionHandler, type Session_Locals } from './auth.middleware.js';
+import { oicd_tokenHandler, oicd_authHandler, type OICD_AuthHandler, type ProviderOptions, type OICD_TokenHandler } from './oicd.middleware.js';
+import { sessionHandler, tokenRefreshHandler, type OICD_SessionHandler, type SessionHandler } from '@/middlewares/auth.middleware.js';
 import { userModel } from '@/models/user.model.js';
 
 const provider = () => ({
@@ -63,7 +62,7 @@ export const googleCallback: [OICD_TokenHandler, OICD_SessionHandler, SessionHan
                 email: claims.email,
                 username: `${claims.name.split(' ').join('')}_${randPosfix}`,
                 password: hashedPassword,
-                avatar: claims.picture ?? '/blank-profile.png',
+                avatar: { publicURL: claims.picture ?? '/blank-profile.png' },
                 credentials: [{ issuer: 'google', sub: claims.sub }]
             });
             // wait for token refresh handler to save

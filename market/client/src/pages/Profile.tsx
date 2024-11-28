@@ -1,12 +1,13 @@
 import { useRef, useState, type FormEvent } from 'react';
 import { type RouteObject } from 'react-router-dom';
-import { useRootStore } from '@/store/store';
-import { DesignTwd, ErrorSection, SubmitButton } from '@/components/UI';
+import { useRootDispatch, useRootStore } from '@/store/store';
+import { DesignTwd, AlertSection, SubmitButton } from '@/components/UI';
 import { useForm } from '@/hooks/useForm';
 import { useRequestStates } from '@/hooks/useRequestStates';
 import { supabaseStorage } from '@/utils/supabase';
-import { validator } from '@/utils/validator';
-import { getErrorMessage } from '@/utils/error';
+import { getValidator } from '@/utils/validator';
+import type { UserProfile } from '@/store/slice/userSlice';
+import { privateApi } from '@/utils/axios';
 
 export const profileRoute: RouteObject = {
   path: '/profile',
@@ -14,14 +15,15 @@ export const profileRoute: RouteObject = {
 }
 
 function Profile() {
-  const { file, avatar, loading, hasError, register, handleSubmit } = useProfile();
+  const { file, avatar, loading, hasError, success, register, handleSubmit } = useProfile();
   const buttonDisabled = (loading != false);
 
   const Avatar = () => (
     <>
       <input type='file' className='hidden' ref={file.ref} accept='image/*' onChange={file.handleChange} />
-      <button type='button' onClick={avatar.handleClick} className='block group w-24 h-24 my-4 mx-auto rounded-full overflow-hidden relative'>
-        <img src={avatar.url} alt='avatar' className='w-full h-full object-cover' />
+      <button type='button' onClick={avatar.handleClick} disabled={buttonDisabled}
+        className='block group w-24 h-24 my-4 mx-auto rounded-full overflow-hidden relative'>
+        <img src={avatar.publicURL} alt='avatar' className='w-full h-full object-cover' />
         <div className='w-full h-full -translate-y-full bg-black/50 opacity-0 group-hover:opacity-100 text-white text-lg transition-opacity flex items-center justify-center'>
           Edit
         </div>
@@ -48,26 +50,27 @@ function Profile() {
           UPDATE
         </SubmitButton>
       </form>
-      <ErrorSection error={hasError} />
       <div className='flex justify-between mt-5 text-red-700'>
         <button className='hover:underline'>Delete account</button>
         <button className='hover:underline'>Sign Out</button>
       </div>
+      <AlertSection error={hasError} success={success} />
     </div>
   );
 }
 
-type UpdateFormData = {
-  email: string,
-  username: string,
+type UpdateFormData = Omit<UserProfile, 'id'> & {
   password: string
 }
+const validate = getValidator({ username: true, email: true, password: false });
 
 function useProfile() {
-  const { profile } = useRootStore('user');
-  const { loading, setLoading, hasError, setError, onSend } = useRequestStates(false);
-  const initForm: UpdateFormData = { email: profile!.email, username: profile!.username, password: '' };
-  const { formData, register } = useForm(initForm);
+  const { dispatch, userActions } = useRootDispatch();
+  const { id: userId, ...profile } = useRootStore('user').profile!;
+  const initForm: UpdateFormData = { ...profile, password: '' };
+  const { formData, register, setFormValue, stripUnchanged } = useForm(initForm);
+
+  const { loading, setLoading, hasError, setError, success, setSuccess, onSend } = useRequestStates({ loading: false });
   const [file, setFile] = useState<File>();
   const fileInput = useRef<HTMLInputElement>(null);
 
@@ -78,6 +81,7 @@ function useProfile() {
     const newFile = fileInput.current?.files?.[0];
     if (!newFile) return;
     setFile(newFile);
+    setFormValue('avatar', supabaseStorage.getAvatarURL(newFile, userId));
   }
   function removeFile() {
     setFile(undefined);
@@ -85,43 +89,36 @@ function useProfile() {
 
   function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    if (!validator.username(formData)) {
-      setError(validator.errors.username); return;
+    const validated = validate(formData);
+    if (validated !== true) {
+      setError(validated); return;
     }
-    else if (!validator.email(formData)) {
-      setError(validator.errors.email); return;
-    }
-    else if (formData.password != initForm.password && !validator.password(formData)) {
-      setError(validator.errors.password); return;
+    const [toSend, nChanged] = stripUnchanged();
+    if (nChanged == 0) {
+      setSuccess('Nothing\'s changed'); return;
     }
 
     onSend('submit');
-    const tasks: Promise<boolean>[] = [];
+    const tasks: Promise<boolean | object>[] = [
+      privateApi.post(`/api/user/update/${userId}`, toSend)
+        .then(res => res.data) // return profile data
+        .catch(errMsg => errMsg)
+    ];
 
     if (file) {
-      tasks.push(supabaseStorage.uploadAvatar(file)
-        .then(({data, error}) => {
-          if (data) {
-            return true;
+      tasks.push(supabaseStorage.uploadAvatar(file, formData.avatar, profile.avatar)
+        .then(err => {
+          if (err == null) {
+            setFile(undefined); return true;
           }
-          setError(getErrorMessage(error));
-          return false;
+          setError(err); return false;
         }));
-    }
-
-    const toUpdate = {...formData};
-    for (const prop of (Object.keys(initForm) as (keyof UpdateFormData)[])) {
-      if (toUpdate[prop] == initForm[prop]) {
-        delete toUpdate[prop];
-      }
-    }
-    if (Object.keys(toUpdate).length > 0) {
-
     }
 
     Promise.all(tasks).then(results => {
       if (results.every(success => success)) {
-        setError(undefined);
+        setSuccess('Data update completed.');
+        dispatch(userActions.setProfile(results[0] as UserProfile));
       }
       setLoading(false);
     });
@@ -135,11 +132,12 @@ function useProfile() {
       remove: removeFile
     },
     avatar: {
-      url: profile!.avatar,
+      ...profile.avatar,
       handleClick: handleAvatar
     },
     loading,
     hasError,
+    success,
     register,
     handleSubmit
   };
