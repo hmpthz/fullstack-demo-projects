@@ -56,6 +56,7 @@ const tokenRefresher = new class TokenRefresher {
                 '/api/auth/token/refresh', { withCredentials: true }
             );
             dispatch(userActions.setTokenRefresh(res.data));
+            console.log('Token refreshed.');
             return res.data.accessToken.s;
         }
         catch (err) {

@@ -32,15 +32,26 @@ const credentialSchema = new mongoose.Schema<Credential>({
     }
 });
 
-export interface StorageObject {
+export interface StorageObject0 {
     storageURL?: string;
     publicURL: string;
 }
+export type StorageObject = Required<StorageObject0>;
+const storageObject0Schema = new mongoose.Schema<StorageObject0>({
+    storageURL: {
+        type: String
+    },
+    publicURL: {
+        type: String,
+        required: true
+    }
+});
+
 export interface UserProfile {
     id: string;
     email: string,
     username: string,
-    avatar: StorageObject,
+    avatar: StorageObject0,
 }
 export interface User extends UserProfile {
     password: string,
@@ -62,21 +73,15 @@ const userSchema = new mongoose.Schema<User>({
         required: true
     },
     avatar: {
-        storageURL: {
-            type: String
-        },
-        publicURL: {
-            type: String,
-            required: true
-        }
+        type: storageObject0Schema,
+        required: true
     },
     session: sessionSchema,
     credentials: {
         type: [credentialSchema],
         default: [] // don't need this, mongoose add empty array by default
     }
-},
-    { timestamps: true });
+}, { timestamps: true });
 
 userSchema.index({ 'email': 1 }, { unique: true });
 userSchema.index({ 'session.refreshToken': 1 }, { unique: true });

@@ -57,7 +57,7 @@ type SignUpFormData = {
 const validate = getValidator({ email: true, username: true, password: true });
 
 function useSignUp() {
-  const { req, handleOAuthContext } = useOAuth({ loading: false });
+  const { loading, error, success, handleOAuthContext } = useOAuth({ loading: false });
   const { formData, register } = useForm<SignUpFormData>({ email: '', username: '', password: '' });
   const navigate = useNavigate();
 
@@ -65,23 +65,23 @@ function useSignUp() {
     e.preventDefault();
     const validated = validate(formData);
     if (validated !== true) {
-      req.setError(validated); return;
+      error.set(validated); return;
     }
 
-    req.onSend('submit');
+    loading.send('submit');
     publicApi.post('/api/auth/signup', formData)
       .then(handleSignUpSuccess)
-      .catch(req.onError);
+      .catch(error.receive);
   }
 
   function handleSignUpSuccess() {
-    req.onSuccess();
+    success.receive();
     navigate(`/sign-in?success=${encodeURI('Signed up successfully.')}`);
   }
 
   return {
-    loading: req.loading,
-    hasError: req.hasError,
+    loading: loading.val,
+    hasError: error.val,
     register,
     handleSubmit,
     handleOAuth: handleOAuthContext

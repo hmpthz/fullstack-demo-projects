@@ -1,17 +1,19 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, type ChangeEvent } from 'react';
 
 export function useForm<T extends Record<string, unknown>>(initial: T) {
   const [formData, setFormData] = useState<T>(initial);
 
-  function setFormValue(prop: keyof T, value: unknown) {
+  function setFormValue<K extends keyof T>(prop: K, value: T[K]) {
     if (formData[prop] != value) {
       setFormData({ ...formData, [prop]: value });
     }
   }
 
-  function register<P extends keyof T>(prop: P) {
+  function register<K extends keyof T>(prop: K) {
     function onChange(e: ChangeEvent<HTMLInputElement>) {
-      setFormValue(prop, e.target.value);
+      // eslint-disable-next-line
+      setFormValue(prop, e.target.value as any);
     }
     return {
       onChange,
@@ -31,10 +33,15 @@ export function useForm<T extends Record<string, unknown>>(initial: T) {
     return [newData as Partial<T>, nChanged];
   }
 
+  function resetForm() {
+    setFormData({ ...initial });
+  }
+
   return {
     formData,
     register,
     setFormValue,
-    stripUnchanged
+    stripUnchanged,
+    resetForm
   };
 }

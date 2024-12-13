@@ -20,11 +20,6 @@ export function getErrorMessage(err: unknown) {
 }
 
 export function joinErrors(errors: (string | null)[]) {
-    let res: string | null = null;
-    for (const msg of errors) {
-        if (msg) {
-            res = res ? `${res};${msg}` : msg;
-        }
-    }
-    return res;
+    const res = errors.filter((s) => !!s).join('; ');
+    if (res) throw res;
 }

@@ -1,46 +1,52 @@
 import { StorageClient } from '@hmpthz/supabase-storage-js';
 import { getRootStore } from '@/store/store';
 import { privateApi } from './axios';
-import type { StorageObject, UserToken } from '@/store/slice/userSlice';
+import type { StorageObject0, StorageObject, UserToken } from '@/store/slice/userSlice';
 import { getErrorMessage, joinErrors } from './error';
 
+type SupabaseResult<T> = { data: T, error: null } | { data: null, error: string };
+export type UploadState = 'none' | 'uploading' | 'success' | 'error';
+
 class SupabaseStorage extends StorageClient {
+    protected bucket: ReturnType<StorageClient['from']>;
     protected _store = getRootStore();
-    protected _authenticating?: Promise<string>;
+    protected _authenticating?: Promise<SupabaseResult<string>>;
 
     constructor() {
-        super(`https://${SUPABASE_PROJECT_ID}.supabase.co/storage/v1`, {});
+        super(`${SUPABASE_URL}/storage/v1`, {});
+        this.bucket = this.from('estate-market');
+    }
+    async uploadDifference(file: File, newObj: StorageObject, oldObj: StorageObject0) {
+        const err = await this._setAuthHeader();
+        if (err != null) throw err;
+
+        const tasks: Promise<string | null>[] = [];
+        tasks.push(this.upsertFile(newObj.storageURL!, file));
+        if (oldObj.storageURL && oldObj.storageURL != newObj.storageURL) {
+            tasks.push(this.deleteFiles([oldObj.storageURL]));
+        }
+        joinErrors(await Promise.all(tasks));
+    }
+    async uploadMany(files: File[], objs: StorageObject[], setState?: (s: UploadState, i?: number) => void) {
+        const err = await this._setAuthHeader();
+        if (err != null) throw err;
+
+        setState?.('uploading');
+        return Promise.all(files.map((file, i) =>
+            this.upsertFile(objs[i].storageURL, file).then(err => {
+                setState?.(err ? 'error' : 'success', i);
+                return err;
+            })
+        ));
     }
 
-    getAvatarURL(file: File, userId: string): StorageObject {
-        const extname = file.name.slice(file.name.lastIndexOf('.'));
-        const storageURL = `avatar/${userId}${extname}`;
-        // pretend we're hashing the file
-        const hashtag = Math.random().toString(36).slice(2);
-        // add a hashtag url param so that browser can refetch image even if url is unchanged
-        const publicURL = `${this.url}/object/public/estate-market/${storageURL}?hashtag=${hashtag}`;
-        return { storageURL, publicURL };
+    upsertFile(url: string, file: File, cacheControl = '86400') {
+        return this.bucket.upload(url, file, { cacheControl, upsert: true })
+            .then(({ error }) => error ? getErrorMessage(error) : null);
     }
-
-    async uploadAvatar(file: File, newObj: StorageObject, oldObj: StorageObject) {
-        try {
-            await this._setAuthHeader();
-            const tasks: Promise<string | null>[] = [];
-
-            tasks.push(this.from('estate-market')
-                .upload(newObj.storageURL!, file, { cacheControl: '86400', upsert: true })
-                .then(({ error }) => error != null ? getErrorMessage(error) : null)
-            );
-            if (newObj.storageURL != oldObj.storageURL) {
-                tasks.push(this.from('estate-market')
-                    .remove([newObj.storageURL!])
-                    .then(({ error }) => error != null ? getErrorMessage(error) : null));
-            }
-            return Promise.all(tasks).then(joinErrors);
-        }
-        catch (err) {
-            return getErrorMessage(err);
-        }
+    deleteFiles(urls: string[]) {
+        return this.bucket.remove(urls)
+            .then(({ error }) => error ? getErrorMessage(error) : null);
     }
 
     protected async _setAuthHeader() {
@@ -50,28 +56,31 @@ class SupabaseStorage extends StorageClient {
             if (!this._authenticating) {
                 this._authenticating = this._getAccessToken();
             }
-            accessToken = await this._authenticating;
+            const result = await this._authenticating;
+            if (result.data != null)
+                accessToken = result.data;
+            else
+                return result.error;
         }
         else {
             accessToken = supabase.s;
         }
         this.headers['Authorization'] = `Bearer ${accessToken}`;
+        return null;
     }
-
-    protected async _getAccessToken() {
+    protected async _getAccessToken(): Promise<SupabaseResult<string>> {
         const { dispatch, userActions } = this._store;
-
         try {
             const res = await privateApi.get<UserToken>(
                 '/api/auth/token/supabase', { withCredentials: true }
             );
             dispatch(userActions.setSupabaseToken(res.data));
-            return res.data.s;
+            return { data: res.data.s, error: null };
         }
         catch (err) {
             // failed to obtain new token
             dispatch(userActions.setSupabaseToken(undefined));
-            throw err;
+            return { data: null, error: err as string };
         }
         finally {
             this._authenticating = undefined;

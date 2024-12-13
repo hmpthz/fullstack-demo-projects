@@ -1,4 +1,5 @@
-import mongoose from "mongoose";
+import { env } from "@/env.js";
+import mongoose, { STATES } from "mongoose";
 
 declare global {
     namespace Express {
@@ -9,19 +10,13 @@ declare global {
 }
 
 export async function connectDatabase() {
-    if (process.env.DB_URL == undefined) {
-        throw new Error('DB_URL not found');
+    const state = mongoose.connection.readyState;
+    if (state != STATES.connected && state != STATES.connecting) {
+        const db_url = !env.LOCAL_DB
+            ? env.DB_URL
+            : 'mongodb://127.0.0.1:5172/estate-market';
+        await mongoose.connect(db_url, { connectTimeoutMS: 3000 });
+        console.log('Database connected.');
     }
-    const db_url = process.env.LOCAL_DB == undefined
-        ? process.env.DB_URL
-        : 'mongodb://127.0.0.1:5172/estate-market';
-
-    await mongoose.connect(db_url, { connectTimeoutMS: 3000 });
-    console.log('Database connected.');
     return mongoose;
-}
-
-export async function disconnectDatabase() {
-    await mongoose.disconnect();
-    console.log('Database disconnected.');
 }

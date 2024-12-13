@@ -11,6 +11,12 @@ export function useRequestStates(initial: { loading: string | boolean } & Alert)
   function setError(errMsg?: string) {
     setAlert({ error: errMsg, success: undefined });
   }
+  function addError(errMsg: string) {
+    setAlert(({ error }) => ({
+      error: error ? `${error}; ${errMsg}` : errMsg,
+      success: undefined
+    }));
+  }
   function setSuccess(successMsg?: string) {
     setAlert({ error: undefined, success: successMsg });
   }
@@ -28,9 +34,21 @@ export function useRequestStates(initial: { loading: string | boolean } & Alert)
   }
 
   return {
-    loading, setLoading,
-    hasError: alert.error, setError,
-    success: alert.success, setSuccess,
-    onSuccess, onError, onSend
+    loading: {
+      val: loading,
+      set: setLoading,
+      send: onSend
+    },
+    error: {
+      val: alert.error,
+      set: setError,
+      add: addError,
+      receive: onError
+    },
+    success: {
+      val: alert.success,
+      set: setSuccess,
+      receive: onSuccess
+    }
   };
 }

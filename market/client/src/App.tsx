@@ -8,6 +8,7 @@ import { Header } from './components/Header';
 import { StoreProvider } from './store/store';
 import { useRefreshToken } from './utils/axios';
 import { privateRoute } from './components/PrivateRoute';
+import { createListingRoute } from './pages/CreateListing';
 
 export const appRoute: RouteObject[] = [
   {
@@ -18,7 +19,8 @@ export const appRoute: RouteObject[] = [
       signupRoute,
       aboutRoute,
       privateRoute([
-        profileRoute
+        profileRoute,
+        createListingRoute
       ])
     ]
   }

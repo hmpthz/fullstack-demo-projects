@@ -2,15 +2,16 @@ import { createSlice, type CaseReducer, type PayloadAction } from '@reduxjs/tool
 import { persistReducer } from 'redux-persist';
 import storage from "redux-persist/lib/storage";
 
-export interface StorageObject {
+export interface StorageObject0 {
     storageURL?: string,
     publicURL: string
 }
+export type StorageObject = Required<StorageObject0>;
 export interface UserProfile {
     id: string;
     email: string;
     username: string;
-    avatar: StorageObject;
+    avatar: StorageObject0;
 }
 export interface UserToken {
     s: string,
@@ -45,6 +46,9 @@ const setSupabaseToken: CaseReducer<UserStore, PayloadAction<UserToken | undefin
 const notFirstTime: CaseReducer<UserStore> = (state) => {
     state.firstTime = false;
 }
+const clearAll: CaseReducer<UserStore> = (state) => {
+    state.profile = state.accessToken = state.supabase = undefined;
+}
 
 const userSlice = createSlice({
     name: 'user',
@@ -53,7 +57,8 @@ const userSlice = createSlice({
         setProfile,
         setTokenRefresh,
         setSupabaseToken,
-        notFirstTime
+        notFirstTime,
+        clearAll
     }
 });
 export const userReducers = persistReducer({

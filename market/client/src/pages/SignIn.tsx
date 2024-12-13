@@ -57,7 +57,7 @@ const validate = getValidator({ email: true });
 
 function useSignIn(provider: string | undefined) {
   const [query] = useSearchParams();
-  const { req, handleOAuthContext, handleOAuthRedirect } = useOAuth({
+  const { loading, error, success, handleOAuthContext, handleOAuthRedirect } = useOAuth({
     loading: provider != undefined, error: query.get('error') ?? undefined, success: query.get('success') ?? undefined
   });
   const { formData, register } = useForm<SignInFormData>({ email: '', password: '' });
@@ -68,18 +68,18 @@ function useSignIn(provider: string | undefined) {
     e.preventDefault();
     const validated = validate(formData);
     if (validated !== true) {
-      req.setError(validated); return;
+      error.set(validated); return;
     }
 
-    req.onSend('submit');
+    loading.send('submit');
     publicApi.post('/api/auth/signin', formData)
       .then(res => handleSignInSuccess(res.data))
-      .catch(req.onError);
+      .catch(error.receive);
   }
 
   // eslint-disable-next-line
   function handleSignInSuccess(data: any) {
-    req.onSuccess();
+    success.receive();
     dispatch(userActions.setTokenRefresh(data));
     navigate('/');
     console.log(data);
@@ -90,9 +90,9 @@ function useSignIn(provider: string | undefined) {
   }, []);
 
   return {
-    loading: req.loading,
-    hasError: req.hasError,
-    success: req.success,
+    loading: loading.val,
+    hasError: error.val,
+    success: success.val,
     register,
     handleSubmit,
     handleOAuth: handleOAuthContext

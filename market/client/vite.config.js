@@ -23,7 +23,7 @@ const config = defineConfig({
   ],
 
   define: {
-    SUPABASE_PROJECT_ID: '"stiuxjzdafqndcrgkfrn"',
+    SUPABASE_URL: '"https://stiuxjzdafqndcrgkfrn.supabase.co"',
     DEBUG_IGNORE_TOKEN: false
   },
   resolve: {

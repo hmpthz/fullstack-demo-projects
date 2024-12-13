@@ -19,8 +19,8 @@ export function useOAuth(initial: Parameters<typeof useRequestStates>[0]) {
   const req = useRequestStates(initial);
 
   const handleOAuthContext = (provider: string) => () => {
-    req.setLoading(provider);
-    req.setError(undefined);
+    req.loading.set(provider);
+    req.error.set(undefined);
     publicApi.get<OICD_Auth_Response>(`/api/auth/${provider}`)
       .then(res => {
         const { ctx, auth_url } = res.data;
@@ -31,7 +31,7 @@ export function useOAuth(initial: Parameters<typeof useRequestStates>[0]) {
         window.location.replace(auth_url);
       })
       .catch(errMsg => {
-        req.setError(errMsg);
+        req.error.set(errMsg);
       });
   }
 
@@ -45,14 +45,14 @@ export function useOAuth(initial: Parameters<typeof useRequestStates>[0]) {
       return;
     }
     if (!supportedProviders.includes(provider)) {
-      req.setError(`Unsupported provider: ${provider}`);
+      req.error.set(`Unsupported provider: ${provider}`);
       return;
     }
     // oauth redirect page, ask for id token
     // recover session context
     const ctx = sessionStorage.getItem(`oauth_${provider}`);
     if (!ctx) {
-      req.setError(`Auth context missing`);
+      req.error.set(`Auth context missing`);
       return;
     }
     // redirect page has params for auth
@@ -66,12 +66,12 @@ export function useOAuth(initial: Parameters<typeof useRequestStates>[0]) {
     publicApi.post(`/api/auth/${provider}/callback`, toSend)
       .then(res => handleSuccess(res.data))
       .catch(errMsg => {
-        req.setError(errMsg);
+        req.error.set(errMsg);
       });
   }
 
   return {
-    req,
+    ...req,
     handleOAuthContext,
     handleOAuthRedirect
   };
