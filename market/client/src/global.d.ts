@@ -2,6 +2,7 @@
 import type { ReactNode, Dispatch, SetStateAction } from 'react';
 
 declare global {
+    const VERCEL: boolean;
     const SUPABASE_URL: string;
     const DEBUG_IGNORE_TOKEN: boolean;
 

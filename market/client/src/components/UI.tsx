@@ -12,8 +12,8 @@ export const DesignTwd = {
 interface LoadingButtonProps extends React.ComponentProps<'button'> {
   cond: boolean;
 }
-export const LoadingButton = ({ cond, children, className, ...props }: LoadingButtonProps) => (
-  <button className={`${className} ${DesignTwd.button}`} {...props}>
+export const LoadingButton = ({ cond, children, ...props }: LoadingButtonProps) => (
+  <button {...props}>
     {cond ? children : <LoadSpinner />}
   </button>
 );
@@ -31,7 +31,7 @@ interface SubmitButtonProps {
 }
 export const SubmitButton = ({ loading, disabled, children }: SubmitButtonProps & ChildrenProps) => (
   <LoadingButton type='submit' cond={loading != 'submit'} disabled={disabled}
-    className='text-white bg-slate-700 hover:bg-slate-600 disabled:bg-slate-500'>
+    className={`${DesignTwd.button} text-white bg-slate-700 hover:bg-slate-600 disabled:bg-slate-500`}>
     {children}
   </LoadingButton>
 );
@@ -59,7 +59,7 @@ export const OAuthSection = ({ loading, disabled, handle }: OAuthProps) => (
       <span className='bg-gray-300 h-0.5 w-full' />
     </div>
     <LoadingButton type='button' cond={loading != 'google'} disabled={disabled} onClick={handle('google')}
-      className='text-white bg-red-700 hover:bg-red-700/80 disabled:bg-red-700/80'>
+      className={`${DesignTwd.button} text-white bg-red-700 hover:bg-red-700/80 disabled:bg-red-700/80`}>
       <p className='flex justify-center items-center gap-3'>
         <FaGoogle className='w-5 h-5' />
         <span>CONTINUE WITH GOOGLE</span>

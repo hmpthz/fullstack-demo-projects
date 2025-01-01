@@ -65,7 +65,7 @@ function useSignUp() {
     e.preventDefault();
     const validated = validate(formData);
     if (validated !== true) {
-      error.set(validated); return;
+      return error.set(validated);
     }
 
     loading.send('submit');

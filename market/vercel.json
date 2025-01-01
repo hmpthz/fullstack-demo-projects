@@ -6,6 +6,10 @@
       "destination": "/api"
     },
     {
+      "source": "/readme/(.*)",
+      "destination": "/readme"
+    },
+    {
       "source": "/(.*)",
       "destination": "/"
     }

@@ -1,13 +1,14 @@
 import { useRef, useState, type FormEvent } from 'react';
 import { Link, type RouteObject } from 'react-router-dom';
 import { useRootDispatch, useRootStore } from '@/store/store';
-import { DesignTwd, AlertSection, SubmitButton, LoadSpinner } from '@/components/UI';
+import { DesignTwd, AlertSection, SubmitButton, LoadingButton } from '@/components/UI';
 import { useForm } from '@/hooks/useForm';
 import { useRequestStates } from '@/hooks/useRequestStates';
 import { supabaseStorage } from '@/utils/supabase';
 import { getValidator } from '@/utils/validator';
 import type { StorageObject, UserProfile } from '@/store/slice/userSlice';
-import { privateApi } from '@/utils/axios';
+import { privateApi, publicApi } from '@/utils/axios';
+import type { Listing } from './CreateListing';
 
 export const profileRoute: RouteObject = {
   path: '/profile',
@@ -15,31 +16,14 @@ export const profileRoute: RouteObject = {
 }
 
 function Profile() {
-  const { file, avatar, req, register, handleSubmit, handleDelete, handleSignOut } = useProfile();
+  const { file, avatar, listing, req, register, handleSubmit, handleDelete, handleSignOut } = useProfile();
   const buttonDisabled = (req.loading != false);
-
-  const Avatar = () => (
-    <>
-      <input type='file' className='hidden' ref={file.ref} accept='image/*' onChange={file.handleChange} />
-      <button type='button' onClick={avatar.handleClick} disabled={buttonDisabled}
-        className='block group w-24 h-24 my-4 mx-auto rounded-full overflow-hidden relative'>
-        <img src={avatar.publicURL} alt='avatar' className='w-full h-full object-cover' />
-        <div className='w-full h-full -translate-y-full bg-black/50 opacity-0 group-hover:opacity-100 text-white text-lg transition-opacity flex items-center justify-center'>
-          Edit
-        </div>
-      </button>
-      {file.state && <button type='button' disabled={buttonDisabled} onClick={file.remove}
-        className='w-full text-center text-green-600 hover:text-red-500 hover:after:content-["_❌"] break-words'>
-        {file.state.name}
-      </button>}
-    </>
-  );
 
   return (
     <div className='p-3 max-w-lg mx-auto'>
       <h1 className='text-3xl font-semibold text-center my-7'>Profile</h1>
       <form className='' onSubmit={handleSubmit}>
-        <Avatar />
+        <Avatar file={file} avatar={avatar} disabled={buttonDisabled} />
         <input id='username' type='text' placeholder='username' autoComplete='username'
           className={DesignTwd.input} {...register('username')} />
         <input id='email' type='email' placeholder='email' autoComplete='email'
@@ -55,17 +39,66 @@ function Profile() {
         CREATE NEW LISTING
       </Link>
       <div className='flex justify-between mt-5 text-red-700'>
-        <button className='hover:underline' onClick={handleDelete} disabled={buttonDisabled}>
-          {req.loading != 'delete' ? 'Delete account' : <LoadSpinner />}
-        </button>
-        <button className='hover:underline' onClick={handleSignOut} disabled={buttonDisabled}>
-          {req.loading != 'signout' ? 'Sign out' : <LoadSpinner />}
-        </button>
+        <LoadingButton cond={req.loading != 'delete'}
+          className='hover:underline' onClick={handleDelete} disabled={buttonDisabled}>
+          Delete account
+        </LoadingButton>
+        <LoadingButton cond={req.loading != 'signout'}
+          className='hover:underline' onClick={handleSignOut} disabled={buttonDisabled}>
+          Sign out
+        </LoadingButton>
       </div>
       <AlertSection error={req.hasError} success={req.success} />
+      <LoadingButton cond={req.loading != 'listing'} onClick={listing.get} disabled={buttonDisabled}
+        className='my-2 w-full text-green-600 hover:underline'>
+        Show Listings
+      </LoadingButton>
+      <div>
+        {listing.arr.map(item =>
+          <ListingCard key={item._id} {...item} disabled={buttonDisabled} loading={req.loading} />)}
+      </div>
     </div>
   );
 }
+
+type DisableProp = {
+  disabled: boolean;
+}
+type AvatarProps = Pick<ReturnType<typeof useProfile>, 'file' | 'avatar'> & DisableProp;
+
+const Avatar = ({ file, avatar, disabled }: AvatarProps) => (
+  <>
+    <input type='file' className='hidden' ref={file.ref} accept='image/*' onChange={file.handleChange} />
+    <button type='button' onClick={avatar.handleClick} disabled={disabled}
+      className='block group w-24 h-24 my-4 mx-auto rounded-full overflow-hidden relative'>
+      <img src={avatar.publicURL} alt='avatar' className='w-full h-full object-cover' />
+      <div className='w-full h-full -translate-y-full bg-black/50 opacity-0 group-hover:opacity-100 text-white text-lg transition-opacity flex items-center justify-center'>
+        Edit
+      </div>
+    </button>
+    {file.state && <button type='button' disabled={disabled} onClick={file.remove}
+      className='w-full text-center text-green-600 hover:text-red-500 hover:after:content-["_❌"] break-words'>
+      {file.state.name}
+    </button>}
+  </>
+);
+
+interface BriefListing extends Pick<Listing, '_id' | 'name' | 'images'>, DisableProp {
+  loading: string | boolean;
+}
+const ListingCard = ({ name, images, disabled, loading }: BriefListing) => (
+  <div className='my-2 p-2 flex items-center gap-2 border rounded-lg'>
+    <img src={images[0].publicURL} className='w-24 h-20 object-contain' />
+    <p className='flex-1 text-lg font-bold'>{name}</p>
+    <div className='flex flex-col items-center'>
+      <LoadingButton cond={loading != 'delete-listing'} disabled={disabled}
+        className='text-green-600 hover:underline'>
+        DELETE
+      </LoadingButton>
+      <p>EDIT</p>
+    </div>
+  </div>
+)
 
 type UpdateFormData = Pick<UserProfile, 'email' | 'username'> & {
   password: string,
@@ -77,11 +110,12 @@ function useProfile() {
   const { dispatch, userActions } = useRootDispatch();
   const { id: userId, ...profile } = useRootStore('user').profile!;
   const initForm: UpdateFormData = { ...profile, password: '', avatarFilename: '' };
-  const { formData, register, setFormValue, stripUnchanged } = useForm(initForm);
+  const { formData, register, stripUnchanged } = useForm(initForm);
 
   const { loading, error, success } = useRequestStates({ loading: false });
   const [file, setFile] = useState<File>();
   const fileInput = useRef<HTMLInputElement>(null);
+  const [listings, setListings] = useState<BriefListing[]>([]);
 
   function handleAvatar() {
     fileInput.current?.click();
@@ -90,22 +124,22 @@ function useProfile() {
     const newFile = fileInput.current?.files?.[0];
     if (!newFile) return;
     setFile(newFile);
-    setFormValue('avatarFilename', newFile.name);
+    formData.avatarFilename = newFile.name;
   }
   function removeFile() {
     setFile(undefined);
-    setFormValue('avatarFilename', '');
+    formData.avatarFilename = '';
   }
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const validated = validate(formData);
     if (validated !== true) {
-      error.set(validated); return;
+      return error.set(validated);
     }
     const [toSend, nChanged] = stripUnchanged();
     if (nChanged == 0) {
-      success.set('Nothing\'s changed'); return;
+      return success.set('Nothing\'s changed');
     }
 
     loading.send('submit');
@@ -115,7 +149,7 @@ function useProfile() {
       )).data;
       if (toSend.avatarFilename && file) {
         await supabaseStorage.uploadDifference(
-          file, profile.avatar as StorageObject, newProfile.avatar
+          file, newProfile.avatar as StorageObject, profile.avatar
         );
         removeFile();
       }
@@ -145,6 +179,20 @@ function useProfile() {
       .catch(error.receive);
   }
 
+  async function getListings() {
+    loading.send('listing');
+    try {
+      const listings = (await publicApi.get<BriefListing[]>(
+        `/api/listing/user/${userId}`
+      )).data;
+      setListings(listings);
+      success.receive();
+    }
+    catch (errMsg) {
+      error.receive(errMsg as string);
+    }
+  }
+
   return {
     file: {
       ref: fileInput,
@@ -155,6 +203,10 @@ function useProfile() {
     avatar: {
       ...profile.avatar,
       handleClick: handleAvatar
+    },
+    listing: {
+      get: getListings,
+      arr: listings
     },
     req: {
       loading: loading.val,

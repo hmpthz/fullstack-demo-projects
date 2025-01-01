@@ -45,15 +45,13 @@ export function useOAuth(initial: Parameters<typeof useRequestStates>[0]) {
       return;
     }
     if (!supportedProviders.includes(provider)) {
-      req.error.set(`Unsupported provider: ${provider}`);
-      return;
+      return req.error.set(`Unsupported provider: ${provider}`);
     }
     // oauth redirect page, ask for id token
     // recover session context
     const ctx = sessionStorage.getItem(`oauth_${provider}`);
     if (!ctx) {
-      req.error.set(`Auth context missing`);
-      return;
+      return req.error.set(`Auth context missing`);
     }
     // redirect page has params for auth
     const params: Record<string, string> = {};

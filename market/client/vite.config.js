@@ -1,4 +1,5 @@
-import { URL, fileURLToPath } from 'url'
+import path from 'path';
+import fs from 'fs';
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
@@ -18,18 +19,16 @@ const config = defineConfig({
   root: '',
   /** relative to root */
   publicDir: 'public',
-  plugins: [
-    react()
-  ],
 
   define: {
+    VERCEL: process.env.VERCEL === '1',
     SUPABASE_URL: '"https://stiuxjzdafqndcrgkfrn.supabase.co"',
     DEBUG_IGNORE_TOKEN: false
   },
   resolve: {
     alias: {
-      '@': fileURLToPath(new URL('./src', import.meta.url)),
-      '@shared': fileURLToPath(new URL('../../utils', import.meta.url)),
+      '@': path.resolve(import.meta.dirname, './src'),
+      '@shared': path.resolve(import.meta.dirname, '../../utils')
     }
   },
 
@@ -42,24 +41,47 @@ const config = defineConfig({
         changeOrigin: true,
         secure: false
       },
-    },
-
-    build: {
-      outDir: 'dist',
-      emptyOutDir: true,
-      target: 'es2015',
-      minify: 'esbuild',
-      sourcemap: false,
-      rollupOptions: {
-
-      }
     }
   },
+
+  build: {
+    outDir: 'dist',
+    emptyOutDir: true,
+    target: 'es2015',
+    minify: 'esbuild',
+    sourcemap: false,
+    rollupOptions: {
+
+    }
+  },
+
+  plugins: [
+    react(),
+    (function () {
+      let outDir = ''; // this context in plugin hooks doesn't point to object
+      function copyToOutDir(src, dest) {
+        fs.copyFileSync(path.resolve(import.meta.dirname, src), path.resolve(outDir, dest));
+      };
+      return {
+        name: 'postbuild-plugin',
+        apply: 'build',
+        configResolved(config) {
+          outDir = config.build.outDir;
+        },
+        closeBundle() {
+          fs.mkdirSync(path.resolve(outDir, 'readme'));
+          copyToOutDir('../../README.html', 'readme/index.html');
+          copyToOutDir('../../README.md', 'readme/README.md');
+        }
+      };
+    })()
+  ]
 });
 
 export default defineConfig(({ mode }) => {
   if (mode == 'development') {
     // config.define.DEBUG_IGNORE_TOKEN = true;
   }
+  console.log('[Vite Define]', JSON.stringify(config.define, undefined, 2));
   return config;
 })

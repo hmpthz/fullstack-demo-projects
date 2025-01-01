@@ -18,7 +18,7 @@ export class SupabaseUtils {
 
     constructor() {
         this.url = `${env.SUPABASE_URL}/storage/v1`;
-        this.publicURL = `${this.url}/object/public/estate-market`;
+        this.publicURL = `${this.url}/object/public/estate-market${env.VERCEL ? '' : '-dev'}`;
     }
 
     getAvatarURL(filename: string | undefined, userId: string): StorageObject | undefined {

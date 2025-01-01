@@ -14,7 +14,7 @@ class SupabaseStorage extends StorageClient {
 
     constructor() {
         super(`${SUPABASE_URL}/storage/v1`, {});
-        this.bucket = this.from('estate-market');
+        this.bucket = this.from(`estate-market${VERCEL ? '' : '-dev'}`);
     }
     async uploadDifference(file: File, newObj: StorageObject, oldObj: StorageObject0) {
         const err = await this._setAuthHeader();
@@ -42,11 +42,11 @@ class SupabaseStorage extends StorageClient {
 
     upsertFile(url: string, file: File, cacheControl = '86400') {
         return this.bucket.upload(url, file, { cacheControl, upsert: true })
-            .then(({ error }) => error ? getErrorMessage(error) : null);
+            .then(({ error }) => error ? getErrorMessage(error) : null).catch(err => getErrorMessage(err));
     }
     deleteFiles(urls: string[]) {
         return this.bucket.remove(urls)
-            .then(({ error }) => error ? getErrorMessage(error) : null);
+            .then(({ error }) => error ? getErrorMessage(error) : null).catch(err => getErrorMessage(err));
     }
 
     protected async _setAuthHeader() {

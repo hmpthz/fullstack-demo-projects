@@ -1,5 +1,5 @@
 const envSchema = {
-    VERCEL_ENV: false,
+    VERCEL: false,
     SUPABASE_URL: true,
     DB_URL: true,
     LOCAL_DB: false,

@@ -20,7 +20,7 @@ export interface Listing {
     furnished: boolean;
     parking: boolean;
     images: StorageObject[];
-    state: string;
+    listingType: string;
     offer: boolean;
     regularPrice: number;
     discountedPrice: number;
@@ -59,7 +59,7 @@ const listingSchema = new mongoose.Schema<Listing>({
         type: [storageObjectSchema],
         default: []
     },
-    state: {
+    listingType: {
         type: String,
         required: true
     },
